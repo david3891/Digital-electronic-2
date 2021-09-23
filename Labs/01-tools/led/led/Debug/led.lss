@@ -3,29 +3,29 @@ led.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .data         00000000  00800100  00800100  000000f2  2**0
+  0 .data         00000000  00800100  00800100  00000122  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  1 .text         0000009e  00000000  00000000  00000054  2**1
+  1 .text         000000ce  00000000  00000000  00000054  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .comment      00000030  00000000  00000000  000000f2  2**0
+  2 .comment      00000030  00000000  00000000  00000122  2**0
                   CONTENTS, READONLY
-  3 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  00000124  2**2
+  3 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  00000154  2**2
                   CONTENTS, READONLY
-  4 .debug_aranges 00000020  00000000  00000000  00000164  2**0
+  4 .debug_aranges 00000020  00000000  00000000  00000194  2**0
                   CONTENTS, READONLY, DEBUGGING
-  5 .debug_info   000006fd  00000000  00000000  00000184  2**0
+  5 .debug_info   0000076f  00000000  00000000  000001b4  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_abbrev 0000065e  00000000  00000000  00000881  2**0
+  6 .debug_abbrev 0000066f  00000000  00000000  00000923  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_line   00000242  00000000  00000000  00000edf  2**0
+  7 .debug_line   00000280  00000000  00000000  00000f92  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_frame  00000024  00000000  00000000  00001124  2**2
+  8 .debug_frame  00000024  00000000  00000000  00001214  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    00000393  00000000  00000000  00001148  2**0
+  9 .debug_str    00000393  00000000  00000000  00001238  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_loc    00000048  00000000  00000000  000014db  2**0
+ 10 .debug_loc    000000d8  00000000  00000000  000015cb  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_ranges 00000010  00000000  00000000  00001523  2**0
+ 11 .debug_ranges 00000010  00000000  00000000  000016a3  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -66,7 +66,7 @@ Disassembly of section .text:
   70:	de bf       	out	0x3e, r29	; 62
   72:	cd bf       	out	0x3d, r28	; 61
   74:	0e 94 40 00 	call	0x80	; 0x80 <main>
-  78:	0c 94 4d 00 	jmp	0x9a	; 0x9a <_exit>
+  78:	0c 94 65 00 	jmp	0xca	; 0xca <_exit>
 
 0000007c <__bad_interrupt>:
   7c:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
@@ -84,8 +84,8 @@ int main(void)
     // PORTB = PORTB and 1101 1111
     PORTB = PORTB & ~(1<<LED_GREEN);
   82:	2d 98       	cbi	0x05, 5	; 5
-        // Pause several milliseconds
-        _delay_ms(SHORT_DELAY);
+        DDRB = DDRB | (1<<LED_GREEN);
+
 
         // Invert LED in Data Register
         // PORTB = PORTB xor 0010 0000
@@ -97,19 +97,61 @@ int main(void)
 	#endif
 
 	__builtin_avr_delay_cycles(__ticks_dc);
-  86:	ef e3       	ldi	r30, 0x3F	; 63
-  88:	fc e9       	ldi	r31, 0x9C	; 156
-  8a:	31 97       	sbiw	r30, 0x01	; 1
-  8c:	f1 f7       	brne	.-4      	; 0x8a <main+0xa>
-  8e:	00 c0       	rjmp	.+0      	; 0x90 <main+0x10>
-  90:	00 00       	nop
-  92:	85 b1       	in	r24, 0x05	; 5
-  94:	89 27       	eor	r24, r25
-  96:	85 b9       	out	0x05, r24	; 5
-  98:	f6 cf       	rjmp	.-20     	; 0x86 <main+0x6>
+  86:	2f ef       	ldi	r18, 0xFF	; 255
+  88:	39 e6       	ldi	r19, 0x69	; 105
+  8a:	88 e1       	ldi	r24, 0x18	; 24
+  8c:	21 50       	subi	r18, 0x01	; 1
+  8e:	30 40       	sbci	r19, 0x00	; 0
+  90:	80 40       	sbci	r24, 0x00	; 0
+  92:	e1 f7       	brne	.-8      	; 0x8c <main+0xc>
+  94:	00 c0       	rjmp	.+0      	; 0x96 <main+0x16>
+  96:	00 00       	nop
+    {
+        
+        // Pause several milliseconds
 
-0000009a <_exit>:
-  9a:	f8 94       	cli
+        _delay_ms(SHORT_DELAY);
+        DDRB = DDRB | (1<<LED_GREEN);
+  98:	25 9a       	sbi	0x04, 5	; 4
+  9a:	2f ef       	ldi	r18, 0xFF	; 255
+  9c:	39 e6       	ldi	r19, 0x69	; 105
+  9e:	88 e1       	ldi	r24, 0x18	; 24
+  a0:	21 50       	subi	r18, 0x01	; 1
+  a2:	30 40       	sbci	r19, 0x00	; 0
+  a4:	80 40       	sbci	r24, 0x00	; 0
+  a6:	e1 f7       	brne	.-8      	; 0xa0 <main+0x20>
+  a8:	00 c0       	rjmp	.+0      	; 0xaa <main+0x2a>
+  aa:	00 00       	nop
+        
+        _delay_ms(SHORT_DELAY);
+        DDRB = DDRB | (1<<LED_GREEN);
+  ac:	25 9a       	sbi	0x04, 5	; 4
+  ae:	2f ef       	ldi	r18, 0xFF	; 255
+  b0:	39 e6       	ldi	r19, 0x69	; 105
+  b2:	88 e1       	ldi	r24, 0x18	; 24
+  b4:	21 50       	subi	r18, 0x01	; 1
+  b6:	30 40       	sbci	r19, 0x00	; 0
+  b8:	80 40       	sbci	r24, 0x00	; 0
+  ba:	e1 f7       	brne	.-8      	; 0xb4 <main+0x34>
+  bc:	00 c0       	rjmp	.+0      	; 0xbe <main+0x3e>
+  be:	00 00       	nop
+        
+        
+        _delay_ms(SHORT_DELAY);
+        DDRB = DDRB | (1<<LED_GREEN);
+  c0:	25 9a       	sbi	0x04, 5	; 4
 
-0000009c <__stop_program>:
-  9c:	ff cf       	rjmp	.-2      	; 0x9c <__stop_program>
+
+        // Invert LED in Data Register
+        // PORTB = PORTB xor 0010 0000
+        PORTB = PORTB ^ (1<<LED_GREEN);
+  c2:	85 b1       	in	r24, 0x05	; 5
+  c4:	89 27       	eor	r24, r25
+  c6:	85 b9       	out	0x05, r24	; 5
+  c8:	de cf       	rjmp	.-68     	; 0x86 <main+0x6>
+
+000000ca <_exit>:
+  ca:	f8 94       	cli
+
+000000cc <__stop_program>:
+  cc:	ff cf       	rjmp	.-2      	; 0xcc <__stop_program>

@@ -1,14 +1,3 @@
-/***********************************************************************
- * 
- * Blink a LED and use function from the delay library.
- * ATmega328P (Arduino Uno), 16 MHz, AVR 8-bit Toolchain 3.6.2
- *
- * Copyright (c) 2018-Present Tomas Fryza
- * Dept. of Radio Electronics, Brno University of Technology, Czechia
- * This work is licensed under the terms of the MIT license.
- * 
- **********************************************************************/
-
 /* Defines -----------------------------------------------------------*/
 /* The preprocessor will process directives that are inserted into the C
  * source code. These directives allow additional actions to be taken on
@@ -20,7 +9,7 @@
  * directives. This is a common mistake.
  */
 #define LED_GREEN   PB5 // AVR pin where green LED is connected
-#define SHORT_DELAY 500 // Delay in milliseconds
+#define SHORT_DELAY 250 // Delay in milliseconds
 #ifndef F_CPU           // Preprocessor directive allows for conditional
                         // compilation. The #ifndef means "if not defined".
 # define F_CPU 16000000 // CPU frequency in Hz required for delay
@@ -49,32 +38,20 @@ int main(void)
     // PORTB = PORTB and 1101 1111
     PORTB = PORTB & ~(1<<LED_GREEN);
 
-
     // Infinite loop
     while (1)
     {
-        
         // Pause several milliseconds
-
         _delay_ms(SHORT_DELAY);
-        DDRB = DDRB | (1<<LED_GREEN);
-        
-        _delay_ms(SHORT_DELAY);
-        DDRB = DDRB | (1<<LED_GREEN);
-        
-        
-        _delay_ms(SHORT_DELAY);
-        DDRB = DDRB | (1<<LED_GREEN);
-
-
-        // Invert LED in Data Register
-        // PORTB = PORTB xor 0010 0000
-        PORTB = PORTB ^ (1<<LED_GREEN);
-        
-        _delay_ms(SHORT_DELAY);
-        DDRB = DDRB | (1<<LED_GREEN);
-        PORTB = PORTB ^ (1<<LED_GREEN);
-        
+		PORTB |= (1<<LED_GREEN);   // LED on
+		_delay_ms(SHORT_DELAY);
+		
+		PORTB &= ~(1<<LED_GREEN);  // LED off
+		_delay_ms(SHORT_DELAY);
+		PORTB |= (1<<LED_GREEN);
+		_delay_ms(1000);
+		PORTB &= ~(1<<LED_GREEN);
+		
     }
 
     // Will never reach this

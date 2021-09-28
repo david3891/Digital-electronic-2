@@ -8,12 +8,12 @@ Link to your `Digital-electronics-2` GitHub repository:
 ### Blink example
 
 1. What is the meaning of the following binary operators in C?
-   * `|`
-   * `&`
-   * `^`
-   * `~`
-   * `<<`
-   * `>>`
+   * `|`  logický součet OR
+   * `&`  logický součin AND
+   * `^`  exkluzivní součet XOR
+   * `~`  negace
+   * `<<` bitový posuv doleva
+   * `>>` bitový posuv doprava
 
 2. Complete truth table with operators: `|`, `&`, `^`, `~`
 

@@ -43,8 +43,8 @@ int main(void)
     // Infinite loop
     while (1)
     {
-        // Pause several milliseconds
-        _delay_ms(SHORT_DELAY);
+                    // Pause several milliseconds
+                    _delay_ms(SHORT_DELAY);
 		    PORTB |= (1<<LED_GREEN);   // LED on
 		    _delay_ms(SHORT_DELAY);
 		

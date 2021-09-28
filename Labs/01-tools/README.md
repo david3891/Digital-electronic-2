@@ -45,8 +45,14 @@ int main(void)
     {
         // Pause several milliseconds
         _delay_ms(SHORT_DELAY);
-
-        // WRITE YOUR CODE HERE
+		    PORTB |= (1<<LED_GREEN);   // LED on
+		    _delay_ms(SHORT_DELAY);
+		
+		    PORTB &= ~(1<<LED_GREEN);  // LED off
+		    _delay_ms(SHORT_DELAY);
+		    PORTB |= (1<<LED_GREEN);
+		    _delay_ms(1000);
+		    PORTB &= ~(1<<LED_GREEN);
     }
 
     // Will never reach this

@@ -125,7 +125,7 @@ Use the datasheet to find out the meaning of the DDRB and PORTB control register
 | **DDRB** | **Description** |
 | :-: | :-- |
 | 0 | Input pin |
-| 1 | |
+| 1 | output pin|
 
 | **PORTB** | **Description** |
 | :-: | :-- |

@@ -2,7 +2,7 @@
 
 Link to your `Digital-electronics-2` GitHub repository:
 
-   [https://github.com/...](https://github.com/...)
+   (https://github.com/david3891/Digital-electronic-2)
 
 
 ### Active-low and active-high LEDs

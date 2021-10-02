@@ -12,7 +12,7 @@ Link to your `Digital-electronics-2` GitHub repository:
 | **DDRB** | **Description** |
 | :-: | :-- |
 | 0 | Input pin |
-| 1 | |
+| 1 | Output pin |
 
 | **PORTB** | **Description** |
 | :-: | :-- |

@@ -1,4 +1,4 @@
-# Lab 2: YOUR_FIRSTNAME FAMILYNAME
+# Lab 2: David Sladkowski
 
 Link to your `Digital-electronics-2` GitHub repository:
 

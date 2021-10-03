@@ -47,11 +47,11 @@ int main(void)
     {
         // Pause several milliseconds
         PORTB |= (1<<LED_GREEN);
-		  PORTC |= (1<<LED_RED);
-		  _delay_ms(BLINK_DELAY);
-		  PORTB = PORTB ^ (1<<LED_GREEN);
-		  PORTC = PORTC ^ (1<<LED_RED);
-		  _delay_ms(BLINK_DELAY);
+	PORTC |= (1<<LED_RED);
+	_delay_ms(BLINK_DELAY);
+	PORTB = PORTB ^ (1<<LED_GREEN);
+	PORTC = PORTC ^ (1<<LED_RED);
+	_delay_ms(BLINK_DELAY);
     }
 
     // Will never reach this

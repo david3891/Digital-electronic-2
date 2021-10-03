@@ -39,7 +39,7 @@ int main(void)
     // Configure the second LED at port C
     DDRC = DDRC | (1<<LED_RED);  //nastav
     PORTC = PORTC & ~(1<<LED_RED); //nuluj
-    PORTC = PORTC ^ (1<<LED_RED); //neguj
+    //PORTC = PORTC ^ (1<<LED_RED); //neguj
 
     // Configure Push button at port D and enable internal pull-up resistor
     DDRD = DDRD & ~(1<<BUTTON);
@@ -48,17 +48,19 @@ int main(void)
     while (1)
     {
         // Pause several milliseconds
+		/*PORTB |= (1<<LED_GREEN);
+		PORTC |= (1<<LED_RED);
         _delay_ms(BLINK_DELAY);
-        PORTB = PORTB ^ (1<<LED_GREEN);
-        PORTC = PORTC ^ (1<<LED_RED);
-       // PORTB |= (1<<LED_GREEN);   // LED on
-        //_delay_ms(BLINK_DELAY);
-       // PORTB &= ~(1<<LED_GREEN);  // LED off
-        
-      // _delay_ms(BLINK_DELAY);
-      // PORTC &= ~(1<<LED_RED);
-      // _delay_ms(BLINK_DELAY);
-       //PORTC |= (1<<LED_RED);
+		PORTC &= ~(1<<LED_RED);
+        PORTB &= ~(1<<LED_GREEN);;
+		_delay_ms(BLINK_DELAY);*/
+		
+		/*PORTB |= (1<<LED_GREEN);
+		PORTC |= (1<<LED_RED);
+		_delay_ms(BLINK_DELAY);
+		PORTB = PORTB ^ (1<<LED_GREEN);
+		PORTC = PORTC ^ (1<<LED_RED);
+		_delay_ms(BLINK_DELAY);*/
        
       if (bit_is_clear(PIND,BUTTON))
       {

@@ -75,9 +75,9 @@ int main(void)
         // Pause several milliseconds
         if (bit_is_clear(PIND,BUTTON))
         {
-         PORTB = PORTB ^ (1<<LED_GREEN);
-         PORTC = PORTC ^ (1<<LED_RED);
-         loop_until_bit_is_set(PIND,BUTTON);
+          PORTB = PORTB ^ (1<<LED_GREEN);
+          PORTC = PORTC ^ (1<<LED_RED);
+          loop_until_bit_is_set(PIND,BUTTON);
         }
 	
     }

@@ -22,7 +22,7 @@ Link to your `Digital-electronics-2` GitHub repository:
 | **DDRB** | **PORTB** | **Direction** | **Internal pull-up resistor** | **Description** |
 | :-: | :-: | :-: | :-: | :-- |
 | 0 | 0 | input | no | Tri-state, high-impedance |
-| 0 | 1 | input | no | Tri-state, high-impedance|
+| 0 | 1 | input | no/yes | Tri-state, high-impedance/Pxn will source current if ext. pulled low|
 | 1 | 0 | output | no | Output low |
 | 1 | 1 | output | no | Output high |
 

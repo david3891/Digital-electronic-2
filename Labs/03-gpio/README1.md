@@ -1,91 +1,280 @@
-# Lab 2: David Sladkowski
+# Lab 3: User library for GPIO control
 
-Link to your `Digital-electronics-2` GitHub repository:
-
-   (https://github.com/david3891/Digital-electronic-2)
+![Atmel Studio 7](Images/screenshot_atmel_studio_gpio.png)
 
 
-### Active-low and active-high LEDs
+### Learning objectives
 
-1. Complete tables according to the AVR manual.
+After completing this lab you will be able to:
+   * Understand the difference between header and source files
+   * Create your own library
+   * Understand how to call a function with pointers
 
-| **DDRB** | **Description** |
-| :-: | :-- |
-| 0 | Input pin |
-| 1 | Output pin |
+The purpose of this laboratory exercise is to learn how to create your own library in C. Specifically, it will be a library for controlling GPIO (General Purpose Input/Output) pins.
 
-| **PORTB** | **Description** |
-| :-: | :-- |
-| 0 | Output low value |
-| 1 | Output high value |
 
-| **DDRB** | **PORTB** | **Direction** | **Internal pull-up resistor** | **Description** |
-| :-: | :-: | :-: | :-: | :-- |
-| 0 | 0 | input | no | Tri-state, high-impedance |
-| 0 | 1 | input | no/yes | Tri-state, high-impedance/Pxn will source current if ext. pulled low|
-| 1 | 0 | output | no | Output low |
-| 1 | 1 | output | no | Output high |
+### Table of contents
+* [Preparation tasks](#preparation)
+* [Part 1: Synchronize repositories and create a new folder](#part1)
+* [Part 2: Library header file](#part2)
+* [Part 3: Library source file](#part3)
+* [Part 4: Final application](#part4)
+* [Experiments on your own](#experiments)
+* [Lab assignment](#assignment)
+* [References](#references)
 
-2. Part of the C code listing with syntax highlighting, which blinks alternately with a pair of LEDs; let one LED is connected to port B and the other to port C:
 
-```c
+<a name="preparation"></a>
+## Preparation tasks (done before the lab at home)
+
+1. Fill in the following table and enter the number of bits and numeric range for the selected data types defined by C.
+
+| **Data type** | **Number of bits** | **Range** | **Description** |
+| :-: | :-: | :-: | :-- | 
+| `uint8_t`  | 8 | 0, 1, ..., 255 | Unsigned 8-bit integer |
+| `int8_t`   |  |  |  |
+| `uint16_t` |  |  |  |
+| `int16_t`  |  |  |  |
+| `float`    |  | -3.4e+38, ..., 3.4e+38 | Single-precision floating-point |
+| `void`     |  |  |  |
+
+2. Any function in C contains a declaration (function prototype), a definition (block of code, body of the function); each declared function can be executed (called). Study [this article](https://www.programiz.com/c-programming/c-user-defined-functions) and complete the missing sections in the following user defined function declaration, definition, and call.
+
+```C
+#include <avr/io.h>
+
+// Function declaration (prototype)
+uint16_t calculate(uint8_t, ...    );
+
 int main(void)
 {
-    // Green LED at port B
-    // Set pin as output in Data Direction Register...
-    DDRB = DDRB | (1<<LED_GREEN);
-    // ...and turn LED off in Data Register
-    PORTB = PORTB & ~(1<<LED_GREEN);
+    uint8_t a = 156;
+    uint8_t b = 14;
+    uint16_t c;
 
-    // Configure the second LED at port C
-    DDRC = DDRC | (1<<LED_RED);  //nastav
-    PORTC = PORTC & ~(1<<LED_RED); //nuluj
-    //PORTC = PORTC ^ (1<<LED_RED); //neguj
+    // Function call
+    c = ...      (a, b);
 
-    // Infinite loop
     while (1)
     {
-        // Pause several milliseconds
-        PORTB |= (1<<LED_GREEN);
-	PORTC |= (1<<LED_RED);
-	_delay_ms(BLINK_DELAY);
-	PORTB = PORTB ^ (1<<LED_GREEN);
-	PORTC = PORTC ^ (1<<LED_RED);
-	_delay_ms(BLINK_DELAY);
     }
-
-    // Will never reach this
     return 0;
+}
+
+// Function definition (body)
+...      calculate(uint8_t x, uint8_t y)
+{
+    uint16_t result;    // result = x^2 + 2xy + y^2
+
+    result = x*x;
+    ...
+    ...
+    return result;
 }
 ```
 
 
-### Push button
+<a name="part1"></a>
+## Part 1: Synchronize repositories and create a new folder
 
-1. Part of the C code listing with syntax highlighting, which toggles LEDs only if push button is pressed. Otherwise, the value of the LEDs does not change. Let the push button is connected to port D:
+Run Git Bash (Windows) of Terminal (Linux), navigate to your working directory, and update local repository.
 
-```c
-    // Configure Push button at port D and enable internal pull-up resistor
-    DDRD = DDRD & ~(1<<BUTTON);
-    PORTD = PORTD | (1<<BUTTON);
+```bash
+## Windows Git Bash:
+$ cd d:/Documents/
+$ cd your-name/
+$ ls
+Digital-electronics-2/
+$ cd Digital-electronics-2/
+$ git pull
 
-    // Infinite loop
-    while (1)
-    {
-        // Pause several milliseconds
-        if (bit_is_clear(PIND,BUTTON))
-        {
-          PORTB = PORTB ^ (1<<LED_GREEN);
-          PORTC = PORTC ^ (1<<LED_RED);
-          loop_until_bit_is_set(PIND,BUTTON);
-        }
-	
-    }
+## Linux:
+$ cd
+$ cd Documents/
+$ cd your-name/
+$ ls
+Digital-electronics-2/
+$ cd Digital-electronics-2/
+$ git pull
+```
+
+Create a new working folder `Labs/03-gpio` for this exercise.
+
+```bash
+## Windows Git Bash or Linux:
+$ cd Labs/
+$ mkdir 03-gpio
 ```
 
 
-### Knight Rider
+<a name="part2"></a>
+## Part 2: Library header file
 
-1. Scheme of Knight Rider application, i.e. connection of AVR device, five LEDs, resistors, one push button, and supply voltage. The image can be drawn on a computer or by hand. Always name all components and their values!
+For clarity and efficiency of the code, the individual parts of the application in C are divided into two types of files: header files and source files.
 
-   ![your figure](https://github.com/david3891/Digital-electronic-2/blob/main/Labs/02-LED/1.png)
+**Header file** is a file with extension `.h` and generally contains definitions of data types, function prototypes and C preprocessor commands. **Source file** is a file with extension `.c` and is used for implementations and source code. It is bad practice to mix usage of the two although it is possible.
+
+C programs are highly dependent on functions. Functions are the basic building blocks of C programs and every C program is combination of one or more functions. There are two types of functions in C: **built-in functions** which are the part of C compiler and **user defined functions** which are written by programmers according to their requirement.
+
+To use a user-defined function, there are three parts to consider:
+   * Function prototype or Function declaration (`*.h` file)
+   * Function definition (`*.c` file)
+   * Function call (`*.c` file)
+
+*[A function prototype](https://www.programiz.com/c-programming/c-user-defined-functions) is simply the declaration of a function that specifies function's name, parameters and return type. It doesn't contain function body. A **function prototype** gives information to the compiler that the function may later be used in the program.*
+
+***Function definition** contains the block of code to perform a specific task.*
+
+*By **calling the function**, the control of the program is transferred to the function.*
+
+A header file can be shared between several source files by including it with the C preprocessing directive `#include`. If a header file happens to be included twice, the compiler will process its contents twice and it will result in an error. The standard way to prevent this is to enclose the entire real contents of the file in a conditional, like this:
+
+```C
+#ifndef HEADER_FILE_NAME        // Preprocessor directive allows for conditional compilation. If not defined.
+# define HEADER_FILE_NAME       // Definition of constant within your source code.
+
+// The body of entire header file
+
+#endif                          // The #ifndef directive must be closed by an #endif
+```
+
+This construct is commonly known as a wrapper `#ifndef`. When the header is included again, the conditional will be false, because `HEADER_FILE_NAME` is already defined. The preprocessor will skip over the entire contents of the file, and the compiler will not see it twice.
+
+
+### Version: Atmel Studio 7
+
+Create a new GCC C Executable Project for ATmega328P within `03-gpio` working folder and copy/paste [template code](main.c) to your `main.c` source file.
+
+In **Solution Explorer** click on the project name, then in menu **Project**, select **Add New Item... Ctrl+Shift+A** and add a new C/C++ Include File `gpio.h`. Copy/paste the [template code](../library/include/gpio.h) into it.
+
+
+### Version: Command-line toolchain
+
+If you haven't already done so, copy folder `library` from `Examples` to `Labs`. Check if `Makefile.in` settings file exists in `Labs` folder.
+
+```bash
+## Linux:
+$ cp -r ../Examples/library .
+$ ls
+01-tools  02-leds  03-gpio  Makefile.in  library
+```
+
+Copy `main.c` and `Makefile` files from previous lab to `Labs/03-gpio` folder.
+
+Copy/paste [template code](main.c) to your `03-gpio/main.c` source file.
+
+Create a new library header file in `Labs/library/include/gpio.h` and copy/paste the [template code](../library/include/gpio.h) into it.
+
+
+### Both versions
+
+Complete the function prototypes definition in `gpio.h` file according to the following table.
+
+| **Return** | **Function name** | **Function parameters** | **Description** |
+| :-: | :-- | :-- | :-- |
+| `void` | `GPIO_config_output` | `volatile uint8_t *reg_name, uint8_t pin_num` | Configure one output pin in Data Direction Register |
+| `void` | `GPIO_config_input_nopull` | `volatile uint8_t *reg_name, uint8_t pin_num` | Configure one input pin in DDR without pull-up resistor |
+| `void` | `GPIO_config_input_pullup` | `volatile uint8_t *reg_name, uint8_t pin_num` | Configure one input pin in DDR and enable pull-up resistor |
+| `void` | `GPIO_write_low` | `volatile uint8_t *reg_name, uint8_t pin_num` | Set one output pin in PORT register to low |
+| `void` | `GPIO_write_high` | `volatile uint8_t *reg_name, uint8_t pin_num` | Set one output pin in PORT register to high |
+| `void` | `GPIO_toggle` | `volatile uint8_t *reg_name, uint8_t pin_num` | Toggle one output pin value in PORT register |
+| `uint8_t` | `GPIO_read` | `volatile uint8_t *reg_name, uint8_t pin_num` | Get input pin value from PIN register |
+
+The register name parameter must be `volatile` to avoid a compiler warning.
+
+Note that the C notation `*variable` representing a pointer to memory location where the variable's **value** is stored. Notation `&variable` is address-of-operator and gives an **address** reference of variable.
+
+> [Understanding C Pointers: A Beginner's Guide](https://www.codewithc.com/understanding-c-pointers-beginners-guide/)
+>
+> ![Understanding C pointers](Images/pointer-variable-ampersand-and-asterisk.png)
+>
+
+
+<a name="part3"></a>
+## Part 3: Library source file
+
+### Version: Atmel Studio 7
+
+In **Solution Explorer** click on the project name, then in menu **Project**, select **Add New Item... Ctrl+Shift+A** and add a new C File `gpio.c`. Copy/paste the [template code](../library/gpio.c) into it.
+
+
+### Version: Command-line toolchain
+
+Create a new `Labs/library/gpio.c` library source file and copy/paste the [template code](../library/gpio.c) into it.
+
+Add the source file of gpio library between the compiled files in `03-gpio/Makefile`.
+
+```Makefile
+# Add or comment libraries you are using in the project
+#SRCS += $(LIBRARY_DIR)/lcd.c
+#SRCS += $(LIBRARY_DIR)/uart.c
+#SRCS += $(LIBRARY_DIR)/twi.c
+SRCS += $(LIBRARY_DIR)/gpio.c
+```
+
+
+### Both versions
+
+Explanation of how to pass an IO port as a parameter to a function is given [here](https://www.eit.lth.se/fileadmin/eit/courses/eita15/avr-libc-user-manual-2.0.0/FAQ.html#faq_port_pass).
+
+Complete the definition of all functions in `gpio.c` file according to the example.
+
+```C
+#include "gpio.h"
+
+/* Function definitions ----------------------------------------------*/
+void GPIO_config_output(volatile uint8_t *reg_name, uint8_t pin_num)
+{
+    *reg_name = *reg_name | (1<<pin_num);
+}
+```
+
+
+<a name="part4"></a>
+## Part 4: Final application
+
+In `03-gpio/main.c` rewrite the LED switching application from the previous exercise using the library functions; make sure that only one LED is turn on at a time, while the other is off. Do not forget to include gpio header file to your main application `#include "gpio.h"`. When calling a function with a pointer, use the address-of-operator `&variable` according to the following example:
+
+```C
+    /* GREEN LED */
+    GPIO_config_output(&DDRB, LED_GREEN);
+```
+
+Compile it and download to Arduino Uno board or load `*.hex` firmware to SimulIDE circuit. Observe the correct function of the application using the flashing LEDs and the push button.
+
+
+## Synchronize repositories
+
+Use [git commands](https://github.com/tomas-fryza/Digital-electronics-2/wiki/Useful-Git-commands) to add, commit, and push all local changes to your remote repository. Check the repository at GitHub web page for changes.
+
+
+<a name="experiments"></a>
+## Experiments on your own
+
+1. Complete declarations (`*.h`) and definitions (`*.c`) of all functions from the GPIO library.
+
+2. Use the GPIO library functions and reprogram the Knight Rider application from the previous lab.
+
+Extra. Use basic [Goxygen commands](http://www.doxygen.nl/manual/docblocks.html#specialblock) inside the C-code comments and prepare your `gpio.h` library for later easy generation of PDF documentation. Get inspired by the `GPIO_config_output` function in the `gpio.h` file.
+
+
+<a name="assignment"></a>
+## Lab assignment
+
+*Prepare all parts of the assignment in Czech, Slovak or English, insert them in this [template](Assignment.md), export formatted output (not Markdown) [from HTML to PDF](https://github.com/tomas-fryza/Digital-electronics-2/wiki/Export-README-to-PDF), and submit a single PDF file via [BUT e-learning](https://moodle.vutbr.cz/). The deadline for submitting the task is the day before the next laboratory exercise.*
+
+*Vypracujte všechny části úkolu v českém, slovenském, nebo anglickém jazyce, vložte je do této [šablony](Assignment.md), exportujte formátovaný výstup (nikoli výpis v jazyce Markdown) [z HTML do PDF](https://github.com/tomas-fryza/Digital-electronics-2/wiki/Export-README-to-PDF) a odevzdejte jeden PDF soubor prostřednictvím [e-learningu VUT](https://moodle.vutbr.cz/). Termín odevzdání úkolu je den před dalším počítačovým cvičením.*
+
+
+<a name="references"></a>
+## References
+
+1. Parewa Labs Pvt. Ltd. [C User-defined functions](https://www.programiz.com/c-programming/c-user-defined-functions)
+
+2. [Understanding C Pointers: A Beginner's Guide](https://www.codewithc.com/understanding-c-pointers-beginners-guide/)
+
+3. avr-libc. [How do I pass an IO port as a parameter to a function?](https://www.eit.lth.se/fileadmin/eit/courses/eita15/avr-libc-user-manual-2.0.0/FAQ.html#faq_port_pass)
+
+4. Tomas Fryza. [Useful Git commands](https://github.com/tomas-fryza/Digital-electronics-2/wiki/Useful-Git-commands)
+
+5. [Goxygen commands](http://www.doxygen.nl/manual/docblocks.html#specialblock)

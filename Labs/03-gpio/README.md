@@ -1,91 +1,49 @@
-# Lab 2: David Sladkowski
+# Lab 3: YOUR_FIRSTNAME FAMILYNAME
 
 Link to your `Digital-electronics-2` GitHub repository:
 
-   (https://github.com/david3891/Digital-electronic-2)
+   [https://github.com/...](https://github.com/...)
 
 
-### Active-low and active-high LEDs
+### Data types in C
 
-1. Complete tables according to the AVR manual.
+1. Complete table.
 
-| **DDRB** | **Description** |
-| :-: | :-- |
-| 0 | Input pin |
-| 1 | Output pin |
-
-| **PORTB** | **Description** |
-| :-: | :-- |
-| 0 | Output low value |
-| 1 | Output high value |
-
-| **DDRB** | **PORTB** | **Direction** | **Internal pull-up resistor** | **Description** |
-| :-: | :-: | :-: | :-: | :-- |
-| 0 | 0 | input | no | Tri-state, high-impedance |
-| 0 | 1 | input | no/yes | Tri-state, high-impedance/Pxn will source current if ext. pulled low|
-| 1 | 0 | output | no | Output low |
-| 1 | 1 | output | no | Output high |
-
-2. Part of the C code listing with syntax highlighting, which blinks alternately with a pair of LEDs; let one LED is connected to port B and the other to port C:
-
-```c
-int main(void)
-{
-    // Green LED at port B
-    // Set pin as output in Data Direction Register...
-    DDRB = DDRB | (1<<LED_GREEN);
-    // ...and turn LED off in Data Register
-    PORTB = PORTB & ~(1<<LED_GREEN);
-
-    // Configure the second LED at port C
-    DDRC = DDRC | (1<<LED_RED);  //nastav
-    PORTC = PORTC & ~(1<<LED_RED); //nuluj
-    //PORTC = PORTC ^ (1<<LED_RED); //neguj
-
-    // Infinite loop
-    while (1)
-    {
-        // Pause several milliseconds
-        PORTB |= (1<<LED_GREEN);
-	PORTC |= (1<<LED_RED);
-	_delay_ms(BLINK_DELAY);
-	PORTB = PORTB ^ (1<<LED_GREEN);
-	PORTC = PORTC ^ (1<<LED_RED);
-	_delay_ms(BLINK_DELAY);
-    }
-
-    // Will never reach this
-    return 0;
-}
-```
+| **Data type** | **Number of bits** | **Range** | **Description** |
+| :-: | :-: | :-: | :-- | 
+| `uint8_t`  | 8 | 0, 1, ..., 255 | Unsigned 8-bit integer |
+| `int8_t`   |  |  |  |
+| `uint16_t` |  |  |  |
+| `int16_t`  |  |  |  |
+| `float`    |  | -3.4e+38, ..., 3.4e+38 | Single-precision floating-point |
+| `void`     |  |  |  |
 
 
-### Push button
+### GPIO library
 
-1. Part of the C code listing with syntax highlighting, which toggles LEDs only if push button is pressed. Otherwise, the value of the LEDs does not change. Let the push button is connected to port D:
+1. In your words, describe the difference between the declaration and the definition of the function in C.
+   * Function declaration
+   * Function definition
+
+2. Part of the C code listing with syntax highlighting, which toggles LEDs only if push button is pressed. Otherwise, the value of the LEDs does not change. Use function from your GPIO library. Let the push button is connected to port D:
 
 ```c
     // Configure Push button at port D and enable internal pull-up resistor
-    DDRD = DDRD & ~(1<<BUTTON);
-    PORTD = PORTD | (1<<BUTTON);
+    // WRITE YOUR CODE HERE
 
     // Infinite loop
     while (1)
     {
         // Pause several milliseconds
-        if (bit_is_clear(PIND,BUTTON))
-        {
-          PORTB = PORTB ^ (1<<LED_GREEN);
-          PORTC = PORTC ^ (1<<LED_RED);
-          loop_until_bit_is_set(PIND,BUTTON);
-        }
-	
+        _delay_ms(BLINK_DELAY);
+
+        // WRITE YOUR CODE HERE
     }
 ```
 
 
-### Knight Rider
+### Traffic light
 
-1. Scheme of Knight Rider application, i.e. connection of AVR device, five LEDs, resistors, one push button, and supply voltage. The image can be drawn on a computer or by hand. Always name all components and their values!
+1. Scheme of traffic light application with one red/yellow/green light for cars and one red/green light for pedestrians. Connect AVR device, LEDs, resistors, one push button (for pedestrians), and supply voltage. The image can be drawn on a computer or by hand. Always name all components and their values!
 
-   ![your figure](https://github.com/david3891/Digital-electronic-2/blob/main/Labs/02-LED/1.png)
+   ![your figure]()

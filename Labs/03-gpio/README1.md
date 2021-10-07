@@ -44,7 +44,7 @@ The purpose of this laboratory exercise is to learn how to create your own libra
 #include <avr/io.h>
 
 // Function declaration (prototype)
-uint16_t calculate(uint8_t, ...    );
+uint16_t calculate(uint8_t a, uint8_t b);
 
 int main(void)
 {

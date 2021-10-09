@@ -15,8 +15,8 @@ Link to your `Digital-electronics-2` GitHub repository:
 | `int8_t`   | 8 | -128, ..., 127 | Signed 8-bit integer |
 | `uint16_t` | 16 | 0, ..., 65 535 | Unsigned 16-bit integer |
 | `int16_t`  | 16 | -32 768, ..., 32 767 | Signed 16-bit integer |
-| `float`    |  | -3.4e+38, ..., 3.4e+38 | Single-precision floating-point |
-| `void`     |  |  |  |
+| `float`    | 32 | -3.4e+38, ..., 3.4e+38 | Single-precision floating-point |
+| `void`     | - | - | Function does not return a value |
 
 
 ### GPIO library

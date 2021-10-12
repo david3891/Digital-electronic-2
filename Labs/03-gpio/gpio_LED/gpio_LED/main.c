@@ -42,19 +42,22 @@ int main(void)
     GPIO_write_low(&PORTC, LED_RED);
 
     // Configure Push button at port D and enable internal pull-up resistor
-    GPIO_write_low(&PORTD, BUTTON);
-    GPIO_config_output(&DDRD, BUTTON);
+    GPIO_read(&PORTD, BUTTON);
+    GPIO_config_input_pullup(&DDRD, BUTTON);
 
     // Infinite loop
     while (1)
     {
-        // Pause several milliseconds
-       PORTB |= (1<<LED_GREEN);
-       PORTC |= (1<<LED_RED);
-       _delay_ms(BLINK_DELAY);
-       PORTB = PORTB ^ (1<<LED_GREEN);
-       PORTC = PORTC ^ (1<<LED_RED);
-       _delay_ms(BLINK_DELAY);
+        if(bit_is_clear(PIND, BUTTON))
+		{
+			_delay_ms(BLINK_DELAY);
+			PORTB = PORTB ^ (1<<LED_GREEN);
+			PORTC = PORTC ^ (1<<LED_RED);
+			_delay_ms(BLINK_DELAY);
+			loop_until_bit_is_set(PIND,BUTTON);
+		}
+		
+       
     }
 
     // Will never reach this

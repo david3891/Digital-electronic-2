@@ -21,7 +21,8 @@
 
 /* Includes ----------------------------------------------------------*/
 #include <util/delay.h>     // Functions for busy-wait delay loops
-#include <avr/io.h>         // AVR device-specific IO definitions
+#include <avr/io.h>			// AVR device-specific IO definitions
+#include <avr/sfr_defs.h> 
 #include "gpio.h"           // GPIO library for AVR-GCC
 
 /* Function definitions ----------------------------------------------*/

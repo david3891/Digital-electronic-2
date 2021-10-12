@@ -35,10 +35,14 @@ Link to your `Digital-electronics-2` GitHub repository:
     // Infinite loop
     while (1)
     {
-        // Pause several milliseconds
-        _delay_ms(BLINK_DELAY);
-
-        // WRITE YOUR CODE HERE
+        if(bit_is_clear(PIND, BUTTON))
+		  {
+			  _delay_ms(BLINK_DELAY);
+			  PORTB = PORTB ^ (1<<LED_GREEN);
+			  PORTC = PORTC ^ (1<<LED_RED);
+			  _delay_ms(BLINK_DELAY);
+			  loop_until_bit_is_set(PIND,BUTTON);
+		  }
     }
 ```
 

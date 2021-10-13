@@ -1,54 +1,44 @@
-# Lab 3: David Sladkowski
+# Lab 4: YOUR_FIRSTNAME FAMILYNAME
 
 Link to your `Digital-electronics-2` GitHub repository:
 
-   (https://github.com/david3891/Digital-electronic-2)
+   [https://github.com/...](https://github.com/...)
 
 
-### Data types in C
+### Overflow times
 
-1. Complete table.
+1. Complete table with overflow times.
 
-| **Data type** | **Number of bits** | **Range** | **Description** |
-| :-: | :-: | :-: | :-- | 
-| `uint8_t`  | 8 | 0, 1, ..., 255 | Unsigned 8-bit integer |
-| `int8_t`   | 8 | -128, ..., 127 | Signed 8-bit integer |
-| `uint16_t` | 16 | 0, ..., 65 535 | Unsigned 16-bit integer |
-| `int16_t`  | 16 | -32 768, ..., 32 767 | Signed 16-bit integer |
-| `float`    | 32 | -3.4e+38, ..., 3.4e+38 | Single-precision floating-point |
-| `void`     | - | - | Function does not return a value |
+| **Module** | **Number of bits** | **1** | **8** | **32** | **64** | **128** | **256** | **1024** |
+| :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: |
+| Timer/Counter0 | 8  | 16u | 128u | -- | | -- | | |
+| Timer/Counter1 | 16 |     |      | -- | | -- | | |
+| Timer/Counter2 | 8  |     |      |    | |    | | |
 
 
-### GPIO library
+### Timer library
 
-1. In your words, describe the difference between the declaration and the definition of the function in C.
-   * Function declaration - Deklarace funkce je prototyp, který určuje název funkce, návratové typy a parametry bez těla funkce.
-   * Function definition - Definice funkce na druhé straně odkazuje na skutečnou funkci, která určuje název funkce, návratové typy a parametry s tělem funkce.
+1. In your words, describe the difference between common C function and interrupt service routine.
+   * Function
+   * Interrupt service routine
 
-2. Part of the C code listing with syntax highlighting, which toggles LEDs only if push button is pressed. Otherwise, the value of the LEDs does not change. Use function from your GPIO library. Let the push button is connected to port D:
+2. Part of the header file listing with syntax highlighting, which defines settings for Timer/Counter0:
 
 ```c
-    // Configure Push button at port D and enable internal pull-up resistor
-    GPIO_read(&PORTD, BUTTON);
-    GPIO_config_input_pullup(&DDRD, BUTTON);
-
-    // Infinite loop
-    while (1)
-    {
-        if(bit_is_clear(PIND, BUTTON))
-	{
-	   _delay_ms(BLINK_DELAY);
-	   PORTB = PORTB ^ (1<<LED_GREEN);
-	   PORTC = PORTC ^ (1<<LED_RED);
-	   _delay_ms(BLINK_DELAY);
-	   loop_until_bit_is_set(PIND,BUTTON);
-	 }
-    }
+/**
+ * @name  Definitions of Timer/Counter0
+ * @note  F_CPU = 16 MHz
+ */
+// WRITE YOUR CODE HERE
 ```
 
+3. Flowchart figure for function `main()` and interrupt service routine `ISR(TIMER1_OVF_vect)` of application that ensures the flashing of one LED in the timer interruption. When the button is pressed, the blinking is faster, when the button is released, it is slower. Use only a timer overflow and not a delay library.
 
-### Traffic light
+   ![your figure]()
 
-1. Scheme of traffic light application with one red/yellow/green light for cars and one red/green light for pedestrians. Connect AVR device, LEDs, resistors, one push button (for pedestrians), and supply voltage. The image can be drawn on a computer or by hand. Always name all components and their values!
 
-   ![obrazek zapojeni](https://github.com/david3891/Digital-electronic-2/blob/main/Labs/03-gpio/obr.PNG)
+### Knight Rider
+
+1. Scheme of Knight Rider application with four LEDs and a push button, connected according to Multi-function shield. Connect AVR device, LEDs, resistors, push button, and supply voltage. The image can be drawn on a computer or by hand. Always name all components and their values!
+
+   ![your figure]()

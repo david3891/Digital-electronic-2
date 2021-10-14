@@ -158,8 +158,8 @@ See the [ATmega328P datasheet](https://www.microchip.com/wwwproducts/en/ATmega32
 | **Program address** | **Source** | **Vector name** | **Description** |
 | :-: | :-- | :-- | :-- |
 | 0x0000 | RESET | -- | Reset of the system |
-| 0x0002 | INT0  | `INT0_vect`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | External interrupt request number 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
-|  | INT1 |  |  |
+| 0x0002 | INT0  | `INT0_vect`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | External interrupt request 0 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
+| 0x0004 | INT1 |  | External Interrupt Request 1 |
 |  | PCINT0 |  |  |
 |  | PCINT1 |  |  |
 |  | PCINT2 |  |  |

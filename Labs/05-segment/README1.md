@@ -1,26 +1,25 @@
-# Lab 4: Interrupts, timers
+# Lab 5: Display devices, 7-segment display
 
-![Multi-function shield](Images/arduino_uno_multi-shield.jpg)
+![Multi-function shield](Images/arduino_uno_multi-shield_segments.jpg)
 
 
 ### Learning objectives
 
 After completing this lab you will be able to:
-   * Use `#define` compiler directives
-   * Use internal microcontroller timers
-   * Understand overflow
-   * Use additional shields with other peripherals
+   * Use seven-segment displays
+   * Understand the SPI communication between MCU and shift registers
+   * Use library functions for seven-segment display
+   * Understand the time multiplexing of individual displays
+   * Use several interrupts within one application
 
-The purpose of the laboratory exercise is to understand the function of the interrupt, interrupt service routine, and the functionality of timer units. Another goal is to practice finding information in the MCU manual; specifically setting timer control registers.
+The purpose of the laboratory exercise is to understand the serial control of four seven-segment displays (SSDs) using a pair of 74595 shift registers. In addition, the goal is to master the use of interrupts in applications with AVR.
 
 
 ### Table of contents
 * [Preparation tasks](#preparation)
 * [Part 1: Synchronize repositories and create a new folder](#part1)
-* [Part 2: Timers](#part2)
-* [Part 3: Polling and Interrupts](#part3)
-* [Part 4: Final application](#part4)
-* [Part 5: PWM (Pulse Width Modulation)](#part5)
+* [Part 2: Seven-segment display](#part2)
+* [Part 3: Counter application](#part3)
 * [Experiments on your own](#experiments)
 * [Lab assignment](#assignment)
 * [References](#references)
@@ -29,21 +28,26 @@ The purpose of the laboratory exercise is to understand the function of the inte
 <a name="preparation"></a>
 ## Preparation tasks (done before the lab at home)
 
-Consider an n-bit number that we increment based on the clock signal. If we reach its maximum value and try to increase it, the value will be reset. We call this state an **overflow**. The overflow time depends on the frequency of the clock signal, the number of bits, and on the prescaler value:
+1. Read the [7-segment display tutorial](https://www.electronics-tutorials.ws/blog/7-segment-display-tutorial.html) and find out what is the difference between:
+   * Common Cathode 7-segment display (CC SSD)
+   * Common Anode 7-segment display (CA SSD)
 
-&nbsp;
-![Timer overflow](Images/timer_overflow.png)
-&nbsp;
+2. In the following table, write the binary values of the segments for display 0 to 9 on a common anode 7-segment display.
 
-1. Calculate the overflow times for three Timer/Counter modules that contain ATmega328P if CPU clock frequency is 16&nbsp;MHz. Complete the following table for given prescaler values. Note that, Timer/Counter2 is able to set 7 prescaler values, including 32 and 128 and other timers have only 5 prescaler values.
+   | **Digit** | **A** | **B** | **C** | **D** | **E** | **F** | **G** | **DP** |
+   | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: |
+   | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 |
+   | 1 |   |   |   |   |   |   |   |   |
+   | 2 |   |   |   |   |   |   |   |   |
+   | 3 | 0 | 0 | 0 | 0 | 1 | 1 | 0 | 1 |
+   | 4 |   |   |   |   |   |   |   |   |
+   | 5 |   |   |   |   |   |   |   |   |
+   | 6 |   |   |   |   |   |   |   |   |
+   | 7 |   |   |   |   |   |   |   |   |
+   | 8 |   |   |   |   |   |   |   |   |
+   | 9 |   |   |   |   |   |   |   |   |
 
-| **Module** | **Number of bits** | **1** | **8** | **32** | **64** | **128** | **256** | **1024** |
-| :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: |
-| Timer/Counter0 | 8  | 16u | 128u | -- | | -- | | |
-| Timer/Counter1 | 16 |     |      | -- | | -- | | |
-| Timer/Counter2 | 8  |     |      |    | |    | | |
-
-2. Shields are boards that can be attached to an Arduino board, significantly expand its capabilities, and makes prototyping much faster. See schematic of [Multi-function shield](../../Docs/arduino_shield.pdf) and find out the connection of four LEDs (D1, D2, D3, D4) and three push buttons (S1-A1, S2-A2, S3-A3).
+3. Use schematic of the [Multi-function shield](../../Docs/arduino_shield.pdf) and find out the connection of seven-segment display. What is the purpose of two shift registers 74HC595?
 
 &nbsp;
 
@@ -61,208 +65,169 @@ Consider an n-bit number that we increment based on the clock signal. If we reac
 <a name="part1"></a>
 ## Part 1: Synchronize repositories and create a new folder
 
-Run Git Bash (Windows) of Terminal (Linux), navigate to your working directory, and update local repository. Create a new working folder `Labs/04-interrupts` for this exercise.
+Run Git Bash (Windows) of Terminal (Linux), navigate to your working directory, and update local repository. Create a new working folder `Labs/05-segments` for this exercise.
 
 
 <a name="part2"></a>
-## Part 2: Timers
+## Part 2: Seven-segment display
 
-A timer (or counter) is a hardware block within an MCU and can be used to measure time events. ATmega328P has three timers, called:
-   * Timer/Counter0,
-   * Timer/Counter1, and
-   * Timer/Counter2.
+**Seven-segment display** (SSD) is an electronic device and consists of eight LEDs connected in parallel that can be lit in different combinations to display the numbers and letters [[1]](https://www.electronics-tutorials.ws/blog/7-segment-display-tutorial.html). These LEDs are called segments and they are titled a, b, ..., g.
 
-T/C0 and T/C2 are 8-bit timers, where T/C1 is a 16-bit timer. The counter counts in synchronization with microcontroller clock from 0 up to 255 (for 8-bit counter) or 65,535 (for 16-bit). Different clock sources can be selected for each timer using a CPU frequency divider with fixed prescaler values, such as 8, 64, 256, 1024, and others.
+Depending upon the decimal digit to be displayed, the particular set of LEDs is forward biased. For instance, to display the numerical digit 0, we will need to light up six of the LED segments corresponding to a, b, c, d, e and f. Thus the various digits from 0 through 9 can be displayed using an SSD. If needed, also usefull letters can be displayed.
 
-The timer modules can be configured with several special purpose registers. According to the [ATmega328P datasheet](https://www.microchip.com/wwwproducts/en/ATmega328p) (eg in the **8-bit Timer/Counter0 with PWM > Register Description** section), which I/O registers and which bits configure the timer operations?
+![Common symbols for 7-segment display](Images/segment_hexa.png)
 
-| **Module** | **Operation** | **I/O register(s)** | **Bit(s)** |
-| :-: | :-- | :-: | :-- |
-| Timer/Counter0 | Prescaler<br><br>8-bit data value<br>Overflow interrupt enable | TCCR0A | <br><br><br> |
-| Timer/Counter1 | Prescaler<br><br>16-bit data value<br>Overflow interrupt enable | TCCR1B<br><br>TCNT1H, TCNT1L<br>TIMSK1 | CS12, CS11, CS10<br>(000: stopped, 001: 1, 010: 8, 011: 64, 100: 256, 101: 1024)<br>TCNT1[15:0]<br>TOIE1 (1: enable, 0: disable) |
-| Timer/Counter2 | Prescaler<br><br>8-bit data value<br>Overflow interrupt enable | <br><br><br> | <br><br><br> |
+The basic ways to control an SSD include:
+   * Directly from AVR output pins,
+   * Using BCD to 7-segment decoder driver, such as 7447,
+   * Via shift register(s).
+
+The shift register method is used in this laboratory. To control the communication, a serial bus (called SPI, Serial Peripheral Interface) is used. Although the ATmega328P includes a hardware SPI drive, in this exercise you shall emulate the serial bus with GPIO operations.
+
+Three signals shall be controlled, called LATCH, CLK, and DATA. These are connected to PD4, PD7 and PB0, respectively as shown in schematic of the [Multi-function shield](../../Docs/arduino_shield.pdf).
+
+Analyze timing of serial communication between ATmega328P and seven-segment displays via two shift registers 74HC595. Example: To display the number `3` at display position 0 (far right position), the following signals must be generated on the three AVR output pins.
+
+&nbsp;
+![Example of 7-segment timing](Images/segment_example.png)
+&nbsp;
+
+> The figure above was created in [WaveDrom](https://wavedrom.com/) digital timing diagram online tool. The source of the figure is as follows:
+>
+```javascript
+{signal: [
+  {name: 'SEGMENT_LATCH (PD4)',
+   wave: '1.l...............h.'},
+  {name: 'SEGMENT_CLK (PD7)',
+   wave: 'l.nn..............l.'},
+  {name: 'SEGMENT_DATA (PB0)',
+   wave: 'xx33333333xxxx5555xx',
+   data: ['DP','g','f','e','d','c','b','a','p0','p1','p2','p3']},
+  {},
+  {name: 'Example: digit `3` at position 0',
+   wave: 'xx33333333xxxx5555xx',
+   data: ['1','0','1','1','0','0','0','0','1','0','0','0']},
+],
+  head: {
+    text: '   1st byte: active-low digit                                    2nd byte: active-high position',
+  },
+  foot: {
+    text: '',
+    tock: -2
+  },
+}
+```
 
 
 ### Version: Atmel Studio 7
 
-Create a new GCC C Executable Project for ATmega328P within `04-interrupts` working folder and copy/paste [template code](main.c) to your `main.c` source file.
+1. Create a new GCC C Executable Project for ATmega328P within `05-segment` working folder and copy/paste [template code](main.c) to your `main.c` source file.
 
-In **Solution Explorer** click on the project name, then in menu **Project**, select **Add New Item... Ctrl+Shift+A** and add a new C/C++ Include File `timer.h`. Copy/paste the [template code](../library/include/timer.h) into it.
+2. In **Solution Explorer** click on the project name, then in menu **Project**, select **Add New Item... Ctrl+Shift+A** and add a new C/C++ Include File `segment.h`. Copy/paste the [template code](../library/include/segment.h) into it.
 
-In **Solution Explorer** click on the project name, then in menu **Project**, select **Add Existing Item... Shift+Alt+A** twice and add both GPIO library files (`gpio.h`, `gpio.c`) from the previous lab.
+3. In **Solution Explorer** click on the project name, then in menu **Project**, select **Add New Item... Ctrl+Shift+A** and add a new C File `segment.c`. Copy/paste the [template code](../library/segment.c) into it.
 
-![Atmel Studio 7](Images/screenshot_atmel_studio_files.png)
+4. In **Solution Explorer** click on the project name, then in menu **Project**, select **Add Existing Item... Shift+Alt+A** and add GPIO and Timer library files (`gpio.h`, `gpio.c`, `timer.h`) from the previous labs.
 
 
 ### Version: Command-line toolchain
 
-Check if `library` folder and `Makefile.in` settings file exist within `Labs` folder. If not, copy them from the `Examples` folder.
+1. Copy `main.c` and `Makefile` files from previous lab to `Labs/05-segment` folder.
 
-Copy `main.c` and `Makefile` files from previous lab to `Labs/04-interrupts` folder.
+2. Copy/paste [template code](main.c) to your `05-segment/main.c` source file.
 
-Copy/paste [template code](main.c) to your `04-interrupts/main.c` source file.
+3. Create a new library header file in `Labs/library/include/segment.h` and copy/paste the [template code](../library/include/segment.h) into it.
 
-Create a new library header file in `Labs/library/include/timer.h` and copy/paste the [template code](../library/include/timer.h) into it.
+4. Create a new `Labs/library/segment.c` library source file and copy/paste the [template code](../library/segment.c) into it.
+
+5. Add the source file of SSD library between the compiled files in `05-segment/Makefile`.
+
+```Makefile
+# Add or comment libraries you are using in the project
+#SRCS += $(LIBRARY_DIR)/lcd.c
+#SRCS += $(LIBRARY_DIR)/uart.c
+#SRCS += $(LIBRARY_DIR)/twi.c
+SRCS += $(LIBRARY_DIR)/gpio.c
+SRCS += $(LIBRARY_DIR)/segment.c
+```
 
 
 ### Both versions
 
-For easier setting of control registers, for Timer/Counter0 and Timer/Counter1 define macros in `timer.h` with suitable names, which will replace the setting at low level. Because we only define macros and not function bodies, the `timer.c` source file is **not needed** this time!
+Study the function prototypes and macro defines in the `segment.h` header file.
 
-```C
-#ifndef TIMER_H
-# define TIMER_H
+| **Return** | **Function name** | **Function parameters** | **Description** |
+| :-: | :-- | :-- | :-- |
+| `void` | `SEG_init` | `void` | Configure SSD signals LATCH, CLK, and DATA as output |
+| `void` | `SEG_update_shift_regs` | `uint8_t segments, uint8_t position` | Display segments at one position of the SSD |
+| `void` | `SEG_clear` | `void` | Turn off all segments at all positions of the SSD |
+| `void` | `SEG_clk_2us` | `void` | Generate one CLK signal period with a duration of 2&nbsp;us |
 
-/* Includes ----------------------------------------------------------*/
-#include <avr/io.h>
+1. Define a function for updating the shift registers. Let the function takes two 8-bit variables as inputs: segments to be displayed and position of the display. Bit 0 of first input represents decimal point DP, bit 1 segment G, etc. The suggested structure of the subroutine is presented in [`segment.c`](../library/segment.c) source file. All proposed delay values are equal to 1&nbsp;us, although according to data sheet 74HC595 they may be smaller. Use delay library here for simplicity.
 
-/* Defines -----------------------------------------------------------*/
-/**
- * @brief Defines prescaler CPU frequency values for Timer/Counter1.
- * @note  F_CPU = 16 MHz
- */
-#define TIM1_stop()             TCCR1B &= ~((1<<CS12) | (1<<CS11) | (1<<CS10));         // 000 --> STOP
-#define TIM1_overflow_4ms()     TCCR1B &= ~((1<<CS12) | (1<<CS11)); TCCR1B |= (1<<CS10);// 001 --> 1
-#define TIM1_overflow_33ms()    TCCR1B &= ~((1<<CS12) | (1<<CS10)); TCCR1B |= (1<<CS11);// 010 --> 8
-#define TIM1_overflow_262ms()   TCCR1B &= ~(1<<CS12); TCCR1B |= (1<<CS11) | (1<<CS10);  // 011 --> 64
-#define TIM1_overflow_1s()      TCCR1B &= ~((1<<CS11) | (1<<CS10)); TCCR1B |= (1<<CS12);// 100 --> 256
-#define TIM1_overflow_4s()      TCCR1B &= ~(1<<CS11); TCCR1B |= (1<<CS12) | (1<<CS10);  // 101 --> 1024
+2. Compile the code and download to Arduino Uno board or load `*.hex` firmware to SimulIDE circuit (create an identical SSD connection using shift registers according to the Multi-function shield).
 
-/**
- * @brief Defines interrupt enable/disable modes for Timer/Counter1.
- */
-#define TIM1_overflow_interrupt_enable()    TIMSK1 |= (1<<TOIE1);   // 1 --> enable
-#define TIM1_overflow_interrupt_disable()   TIMSK1 &= ~(1<<TOIE1);  // 0 --> disable
+   ![SimulIDE](Images/screenshot_simulide_ssd.png)
 
-#endif
+3. Verify that the library function works correctly and display values 0 to 9 in different positions on the display.
+
+4. Create a look-up tables in `segment.c` for getting the segment values given a number between 0 and 9 and positions between 0 and 3.
+
+```c
+/* Variables ---------------------------------------------------------*/
+// Active-low digit 0 to 9
+uint8_t segment_value[] = {
+    // abcdefgDP
+    0b00000011,     // Digit 0
+    0b...,          // Digit 1
+    0b...,          // Digit 2
+    0b00001101,     // Digit 3
+    0b...,          // ...
+    0b...,
+    0b...,
+    0b...,
+    0b...,
+    0b...
+};
+
+// Active-high position 0 to 3
+uint8_t segment_position[] = {
+    // p3p2p1p0....
+    0b00010000,     // Position 0
+    0b00100000,     // Position 1
+    0b...,          // ...
+    0b...
+};
+
+...
+/*--------------------------------------------------------------------*/
+void SEG_update_shift_regs(uint8_t segments, uint8_t position)
+{
+    uint8_t bit_number;
+    segments = segment_value[segments];     // 0, 1, ..., 9
+    position = segment_position[position];  // 0, 1, 2, 3
+    ...
 ```
 
 
 <a name="part3"></a>
-## Part 3: Polling and Interrupts
+## Part 3: Counter application
 
-The state of continuous monitoring of any parameter is called **polling**. The microcontroller keeps checking the status of other devices; and while doing so, it does no other operation and consumes all its processing time for monitoring [[3]](https://www.renesas.com/us/en/support/technical-resources/engineer-school/mcu-programming-peripherals-04-interrupts.html).
+1. Create a decimal counter from 0 to 9 with output on the 7-segment display. Configure a prescaler of 16-bit Timer/Counter1, enable an interrupt after its overflow, and program the ISR to increment the state of the decimal counter after each overflow. Display the value on the SSD.
 
-While polling is a simple way to check for state changes, there's a cost. If the checking interval is too long, there can be a long lag between occurrence and detection and you may miss the change completely, if the state changes back before you check. A shorter interval will get faster and more reliable detection, but also consumes much more processing time and power, since many more checks will come back negative.
+2. Create a counter from 00 to 59 with output on the 7-segment display. To simplify things, you can use separate variables, one for each decade. Let the higher decade be incremented if the lower decade is at its maximum.
 
-An alternative approach is to utilize **interrupts**. With this method, the state change generates an interrupt signal that causes the CPU to suspend its current operation (and save its current state), then execute the processing associated with the interrupt, and then restore its previous state and resume where it left off.
+   To operate multiple displays, it is necessary to constantly switch between them with sufficient speed and repeatedly display the appropriate decade value. For switching, add a second timer Timer/Counter0 with an overflow time of 4 ms. When the timer overflows, switch the display position and send its value to the display. Use a static variable within the interrupt handler to keep the information about the current position.
 
-![Interrupts versus polling](Images/interrupts_vs_polling.jpg)
-
-An interrupt is one of the fundamental features in a microcontroller. It is a signal to the processor emitted by hardware or software indicating an event that needs immediate attention. Whenever an interrupt occurs, the controller completes the execution of the current instruction and starts the execution of an **Interrupt Service Routine (ISR)** or Interrupt Handler. ISR tells the processor or controller what to do when the interrupt occurs [[4]](https://www.tutorialspoint.com/embedded_systems/es_interrupts.htm). After the interrupt code is executed, the program continues exactly where it left off.
-
-Interrupts can be established for events such as a counter's value, a pin changing state, serial communication receiving of information, or the Analog to Digital Converted has finished the conversion process.
-
-See the [ATmega328P datasheet](https://www.microchip.com/wwwproducts/en/ATmega328p) (section **Interrupts > Interrupt Vectors in ATmega328 and ATmega328P**) for sources of interruptions that can occur on ATmega328P. Complete the selected interrupt sources in the following table. The names of the interrupt vectors in C can be found in [C library manual](https://www.nongnu.org/avr-libc/user-manual/group__avr__interrupts.html).
-
-| **Program address** | **Source** | **Vector name** | **Description** |
-| :-: | :-- | :-- | :-- |
-| 0x0000 | RESET | -- | Reset of the system |
-| 0x0002 | INT0  | `INT0_vect`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | External interrupt request 0 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
-| 0x0004 | INT1 |  | External Interrupt Request 1 |
-|  | PCINT0 |  |  |
-|  | PCINT1 |  |  |
-|  | PCINT2 |  |  |
-|  | WDT |  |  |
-|  | TIMER2_OVF |  |  |
-| 0x0018 | TIMER1_COMPB | `TIMER1_COMPB_vect` | Compare match between Timer/Counter1 value and channel B compare value |
-| 0x001A | TIMER1_OVF | `TIMER1_OVF_vect` | Overflow of Timer/Counter1 value |
-|  | TIMER0_OVF |  |  |
-|  | USART_RX |  |  |
-|  | ADC |  |  |
-|  | TWI |  |  |
-
-All interrupts are disabled by default. If you want to use them, you must first enable them individually in specific control registers and then enable them centrally with the `sei()` command (Set interrupt). You can also centrally disable all interrupts with the `cli()` command (Clear interrupt).
-
-
-<a name="part4"></a>
-## Part 4: Final application
-
-In `04-interrupts/main.c` file, rewrite the application for flashing a LED but this time without using the `delay.h` library.
-
-Use Multi-function shield and toggle D1 LED with one of the internal timers. Select its prescaler value and enable overflow interrupt. Do not forget to include both gpio and timer header files to your main application `#include "gpio.h"` and `#include "timer.h"`.
-
-In addition, if you want to use interrupts in your application, you must:
-   * insert the header file `#include <avr/interrupt.h>`,
-   * make peripheral function settings (such as prescaler),
-   * enable specific interrupts (such as overflow),
-   * define interrupt handlers (such as `ISR(TIMER1_OVF_vect)`), and
-   * allow such handlers to run by `sei()` macro.
-
-
-```C
-#include <avr/interrupt.h>  // Interrupts standard C library for AVR-GCC
-...
-
-int main(void)
+```c
+ISR(TIMER0_OVF_vect)
 {
+    static uint8_t pos = 0;  // This line will only run the first time
     ...
-
-    // Enables interrupts by setting the global interrupt mask
-    sei();
-
-    // Infinite loop
-    while (1)
-    {
-        /* Empty loop. All subsequent operations are performed exclusively 
-         * inside interrupt service routines ISRs */
-    }
-
-    // Will never reach this
-    return 0;
-}
-
-ISR(TIMER1_OVF_vect)
-{
-    // WRITE YOUR CODE HERE
 }
 ```
 
-Compile the code and download to Arduino Uno board or load `*.hex` firmware to SimulIDE circuit (create an identical LED connection according to the Multi-function shield).
-
-Observe the correct function of the application on the flashing LED or measure its signal using a logic analyzer or oscilloscope. Try different overflow times.
-
-Consider a push button in the application. If the push button is pressed, let the LEDs blink faster; when the push button is released, the blinking is slower. Note: Do not use an interrupt to check the status of a push button, but a read function from your GPIO library.
-
-Extend the existing application and control four LEDs in [Knight Rider style](https://www.youtube.com/watch?v=w-P-2LdS6zk). Do not use delay library, but a single Timer/Counter.
-
-FYI: Use static variables declared in functions that use them for even better isolation or use volatile for all variables used in both Interrupt routines and main code loop. For example in code [[7]](https://stackoverflow.com/questions/52996693/static-variables-inside-interrupts)
-
-```C
-void IRQHandler(){  
-  static uint16_t i=0;
-  if(i>=500){
-    i=0;
-  }else{
-    i++;
-  }
-}
-```
-
-the line `static uint16_t i=0;` will only run the first time.
-
-
-<a name="part5"></a>
-## Part 5: PWM (Pulse Width Modulation)
-
-Pulse Width Modulation or PWM is a common technique used to vary the width of the pulses in a pulse-train. PWM has many applications such as controlling servos and speed controllers, limiting the effective power of motors and LEDs [[8]](https://www.tutorialspoint.com/arduino/arduino_pulse_width_modulation.htm). There are various terms associated with PWM:
-   * On-Time: duration of time signal is high,
-   * Off-Time: duration of time signal is low,
-   * Period: the sum of on-time and off-time of PWM signal,
-   * Duty Cycle: the percentage of time signal that remains on during the period of the PWM signal.
-
-![PWM](Images/pwm.png)
-
-Use schematic of [Arduino Uno](https://github.com/tomas-fryza/Digital-electronics-2/blob/master/Docs/arduino_shield.pdf) board or [ATmega328P datasheet](https://www.microchip.com/wwwproducts/en/ATmega328p) and in the following table write which Arduino Uno pins can be used to generate the PWM signal by internal timer modules.
-
-| **Module** | **Description** | **MCU pin** | **Arduino pin** |
-| :-: | :-: | :-: | :-: |
-| Timer/Counter0 | OC0A |     |    |
-|                | OC0B |     |    |
-| Timer/Counter1 | OC1A |     |    |
-|                | OC1B | PB2 | 10 |
-| Timer/Counter2 | OC2A |     |    |
-|                | OC2B |     |    |
+![Multiplexing SSD](Images/segment_multiplexing.jpg)
 
 
 ## Synchronize repositories
@@ -273,28 +238,23 @@ Use [git commands](https://github.com/tomas-fryza/Digital-electronics-2/wiki/Use
 <a name="experiments"></a>
 ## Experiments on your own
 
-1. Use the [ATmega328P datasheet](https://www.microchip.com/wwwproducts/en/ATmega328p) (section **16-bit Timer/Counter1 with PWM > Register Description**) and configure Timer/Counter1 to generate a PWM (Pulse Width Modulation) signal on channel B (pin PB2, OC1B). Configure Timer/Counter1 as follows:
-   * Select Compare output mode, Fast PWM in register TCCR1A: **non-inverting mode** (Clear OC1A/OC1B on Compare Match, set OC1A/OC1B at BOTTOM),
-   * Select Waveform generation in registers TCCR1A and TCCR1B: **Fast PWM, 10-bit**,
-   * Select clock prescaler in TCCR1B: **8**,
-   * Set default duty cycle in OCR1B to 50%: **0x01FF**,
-   * Enable Output Compare B Match Interrupt in TIMSK1: **OCIE1B**.
+1. Try extending the decimal counter to four positions and display stopwatch values from 00.00 to 59.59.
 
-   Do not forget to enable interrupts by setting the global interrupt mask `sei()` and increment the duty cycle in OCR1B when the timer value is equal to compare value, ie. within interrupt handler `ISR(TIMER1_COMPB_vect)`. Clear the OCR1B value when it reaches its maximum, ie 0x03FF.
+2. In segment library, program function `SEG_clear()`, which ensures that the entire display goes out, ie no segment will be switched on, and also the `SEG_clk_2us()` function, which will generate 1 period of a clock signal with a frequency of 500&nbsp;kHz.
 
-   Note that, the 16-bit value of the output compare register pair OCR1BH:L is directly accessible using the OCR1B variable defined in the AVR Libc library. 
+3. Modify the look-up table and program a cycling snake, such as [[4]](https://www.youtube.com/watch?v=5cIfiIujSPs) or [[5]](https://www.youtube.com/watch?v=pywOh2YC1ik).
 
-   Connect an oscilloscope to PB2 pin (in SimulIDE **Meters > Oscope**) and observe the changes in the generated signal.
+Extra. Use basic [Goxygen commands](http://www.doxygen.nl/manual/docblocks.html#specialblock) and revise your `segment.h` comments for later easy generation of PDF documentation.
 
-![SimulIDE](Images/screenshot_simulide_pwm.png)
+Extra. According to the [ATmega328P datasheet](https://www.microchip.com/wwwproducts/en/ATmega328p) which I/O registers and which bits configure the Pin Change Interrupts (see External Interrupts)? What vector names have the PCINT [interrupt service routines](https://www.nongnu.org/avr-libc/user-manual/group__avr__interrupts.html)? Complete the table below.
 
-2. Use the [ATmega328P datasheet](https://www.microchip.com/wwwproducts/en/ATmega328p) (section **8-bit Timer/Counter0 with PWM > Modes of Operation**) to find the main differences between:
-   * Normal mode,
-   * Clear Timer on Compare mode,
-   * Fast PWM mode, and
-   * Phase Correct PWM Mode.
+| **Interrupt** | **Vector name** | **Pins** | **Operation** | **I/O register** | **Bit(s)** |
+| :-: | :-: | :-: | :-- | :-: | :-: |
+| Pin Change Interrupt 0 | `PCINT0_vect` | PB[7:0] | Interrupt enable<br>Select pins | PCICR<br>PCMSK0 | PCIE0<br>PCINT[7:0] |
+| Pin Change Interrupt 1 | `PCINT1_vect`|  | Interrupt enable<br>Select pins | <br> | <br> |
+| Pin Change Interrupt 2 | `PCINT2_vect`|  | Interrupt enable<br>Select pins | <br> | <br> |
 
-Extra. Use basic [Goxygen commands](http://www.doxygen.nl/manual/docblocks.html#specialblock) inside the C-code comments and prepare your `timer.h` library for later easy generation of PDF documentation.
+Program an application that uses any push button on Multi-function shield and Pin Change Interrupts 11:9 to reset the decimal counter value. Help: Configure Pin Change Interrupt Control Register (PCICR) and Pin Change Mask Register 1 (PCMSK1).
 
 
 <a name="assignment"></a>
@@ -308,22 +268,18 @@ Extra. Use basic [Goxygen commands](http://www.doxygen.nl/manual/docblocks.html#
 <a name="references"></a>
 ## References
 
-1. Tomas Fryza. [Schematic of Arduino Uno board](../../Docs/arduino_shield.pdf)
+1. AspenCore, Inc. [7-segment display tutorial](https://www.electronics-tutorials.ws/blog/7-segment-display-tutorial.html)
 
-2. Microchip Technology Inc. [ATmega328P datasheet](https://www.microchip.com/wwwproducts/en/ATmega328p)
+2. Tomas Fryza. [Schematic of Arduino Uno board](../../Docs/arduino_shield.pdf)
 
-3. Renesas Electronics Corporation. [Essentials of Microcontroller Use Learning about Peripherals: Interrupts](https://www.renesas.com/us/en/support/technical-resources/engineer-school/mcu-programming-peripherals-04-interrupts.html)
+3. Tomas Fryza. [Useful Git commands](https://github.com/tomas-fryza/Digital-electronics-2/wiki/Useful-Git-commands)
 
-4. Tutorials Point. [Embedded Systems - Interrupts](https://www.tutorialspoint.com/embedded_systems/es_interrupts.htm)
+4. Aleksei Tepljakov. [7 segment display application: snake](https://www.youtube.com/watch?v=5cIfiIujSPs)
 
-5. [C library manual](https://www.nongnu.org/avr-libc/user-manual/group__avr__interrupts.html)
+5. greenoakst. [Cycling snake on 2-digit 7-segment display](https://www.youtube.com/watch?v=pywOh2YC1ik)
 
-6. norwega. [Knight Rider style chaser](https://www.youtube.com/watch?v=w-P-2LdS6zk)
+6. [Goxygen commands](http://www.doxygen.nl/manual/docblocks.html#specialblock)
 
-7. StackOverflow. [Static variables inside interrupts](https://stackoverflow.com/questions/52996693/static-variables-inside-interrupts)
+7. Microchip Technology Inc. [ATmega328P datasheet](https://www.microchip.com/wwwproducts/en/ATmega328p)
 
-8. Tutorials Point. [Arduino - Pulse Width Modulation](https://www.tutorialspoint.com/arduino/arduino_pulse_width_modulation.htm)
-
-9. Tomas Fryza. [Useful Git commands](https://github.com/tomas-fryza/Digital-electronics-2/wiki/Useful-Git-commands)
-
-10. [Goxygen commands](http://www.doxygen.nl/manual/docblocks.html#specialblock)
+8. [C library manual](https://www.nongnu.org/avr-libc/user-manual/group__avr__interrupts.html)

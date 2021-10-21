@@ -42,10 +42,10 @@ The purpose of the laboratory exercise is to understand the serial control of fo
    | 3 | 0 | 0 | 0 | 0 | 1 | 1 | 0 | 1 |
    | 4 | 1 | 1 | 0 | 1 | 1 | 0 | 0 | 1 |
    | 5 | 0 | 1 | 0 | 0 | 1 | 0 | 0 | 1 |
-   | 6 |   |   |   |   |   |   |   |   |
-   | 7 |   |   |   |   |   |   |   |   |
-   | 8 |   |   |   |   |   |   |   |   |
-   | 9 |   |   |   |   |   |   |   |   |
+   | 6 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 1 |
+   | 7 |   |   |   |   |   |   |   | 1 |
+   | 8 |   |   |   |   |   |   |   | 1 |
+   | 9 |   |   |   |   |   |   |   | 1 |
 
 3. Use schematic of the [Multi-function shield](../../Docs/arduino_shield.pdf) and find out the connection of seven-segment display. What is the purpose of two shift registers 74HC595?
 

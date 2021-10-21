@@ -179,7 +179,7 @@ Study the function prototypes and macro defines in the `segment.h` header file.
 uint8_t segment_value[] = {
     // abcdefgDP
     0b00000011,     // Digit 0
-    0b...,          // Digit 1
+    0b10011111,     // Digit 1
     0b...,          // Digit 2
     0b00001101,     // Digit 3
     0b...,          // ...

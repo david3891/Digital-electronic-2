@@ -180,14 +180,14 @@ uint8_t segment_value[] = {
     // abcdefgDP
     0b00000011,     // Digit 0
     0b10011111,     // Digit 1
-    0b...,          // Digit 2
+    0b00100101,     // Digit 2
     0b00001101,     // Digit 3
-    0b...,          // ...
-    0b...,
-    0b...,
-    0b...,
-    0b...,
-    0b...
+    0b...,          // Digit 4
+    0b...,          // Digit 5
+    0b...,          // Digit 6
+    0b...,          // Digit 7
+    0b...,          // Digit 8
+    0b...           // Digit 9
 };
 
 // Active-high position 0 to 3

@@ -30,6 +30,30 @@ void SEG_init(void)
     GPIO_config_output(&DDRD, SEG_CLK);
     GPIO_config_output(&DDRB, SEG_DATA);
 }
+/* Variables ---------------------------------------------------------*/
+// Active-low digit 0 to 9
+uint8_t segment_value[] = {
+    // abcdefgDP
+    0b00000011,     // Digit 0
+    0b10011111,          // Digit 1
+    0b00100101,          // Digit 2
+    0b00001101,     // Digit 3
+    0b10011001,          // ...4
+    0b01001001,         //5
+    0b01000001,    //6
+    0b00011111, //7
+    0b00000001,  //8
+    0b00001001//9
+};
+
+// Active-high position 0 to 3
+uint8_t segment_position[] = {
+    // p3p2p1p0....
+    0b00010000,     // Position 0
+    0b00100000,     // Position 1
+    0b01000000,          // ...
+    0b10000000
+};
 
 /**********************************************************************
  * Function: SEG_update_shift_regs()
@@ -42,36 +66,36 @@ void SEG_init(void)
 void SEG_update_shift_regs(uint8_t segments, uint8_t position)
 {
     uint8_t bit_number;
+    segments = segment_value[segments];     // 0, 1, ..., 9
+    position = segment_position[position];  // 0, 1, 2, 3
 
     // Pull LATCH, CLK, and DATA low
     GPIO_write_low(&PORTD, SEG_LATCH);
     GPIO_write_low(&PORTD, SEG_CLK);
     GPIO_write_low(&PORTB, SEG_DATA);
     // Wait 1 us
-    _delay_us(1);
+    _delay_ms(1);
     // Loop through the 1st byte (segments)
     // a b c d e f g DP (active low values)
     for (bit_number = 0; bit_number < 8; bit_number++)
     {
+        
         // Test LSB of "segments" by & (faster) or % (slower) and... 
         // ...output DATA value
-        if ((segments & 1) == 1)
-            {
-               GPIO_write_high(&PORTB, SEG_DATA); 
-            }
-            else
-            {
-                GPIO_write_low(&PORTB, SEG_DATA);
-            }
+        if((segments & 0b00000001)== 0)
+            GPIO_write_low(&PORTB, SEG_DATA);
+        else
+            GPIO_write_high(&PORTB, SEG_DATA);
         // Wait 1 us
-        _delay_us(1);
+         _delay_ms(1);
         // Pull CLK high
-        GPIO_write_high(&PORTD, SEG_CLK);
+         GPIO_write_high(&PORTD, SEG_CLK);
         // Wait 1 us
-        _delay_us(1);
+         _delay_ms(1);
         // Pull CLK low
         GPIO_write_low(&PORTD, SEG_CLK);
         // Shift "segments"
+        // segments = 0 a b c d e f g 
         segments = segments >> 1;
     }
 
@@ -81,20 +105,16 @@ void SEG_update_shift_regs(uint8_t segments, uint8_t position)
     {
         // Test LSB of "position" by & (faster) or % (slower) and... 
         // ...output DATA value
-        if ((position & 1) == 1)
-        {
-            GPIO_write_high(&PORTB, SEG_DATA);
-        }
-        else
-        {
-            GPIO_write_low(&PORTB, SEG_DATA);
-        }
+         if((position & 0b00000001)== 0)
+             GPIO_write_low(&PORTB, SEG_DATA);
+         else
+             GPIO_write_high(&PORTB, SEG_DATA);
         // Wait 1 us
-        _delay_us(1);
+        _delay_ms(1);
         // Pull CLK high
         GPIO_write_high(&PORTD, SEG_CLK);
         // Wait 1 us
-        _delay_us(1);
+        _delay_ms(1);
         // Pull CLK low
         GPIO_write_low(&PORTD, SEG_CLK);
         // Shift "position"
@@ -104,7 +124,7 @@ void SEG_update_shift_regs(uint8_t segments, uint8_t position)
     // Pull LATCH high
     GPIO_write_high(&PORTD, SEG_LATCH);
     // Wait 1 us
-    _delay_us(1);
+    _delay_ms(1);
 }
 
 /**********************************************************************

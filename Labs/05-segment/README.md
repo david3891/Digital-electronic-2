@@ -9,7 +9,7 @@ Link to your `Digital-electronics-2` GitHub repository:
 
 1. In your words, describe the difference between Common Cathode and Common Anode 7-segment display.
    * CC SSD
-   * CA SSD
+   * CA SSD - anody všech segmentů 7-segmentovky jsou spojeny a připojeny na napájení - ovládají se vysokou úrovní (active high)
 
 2. Code listing with syntax highlighting of two interrupt service routines (`TIMER1_OVF_vect`, `TIMER0_OVF_vect`) from counter application with at least two digits, ie. values from 00 to 59:
 

@@ -8,7 +8,7 @@ Link to this file in your GitHub repository:
 ### LCD display module
 
 1. In your words, describe what ASCII table is.
-   * ASCII table:
+   * ASCII table: jedná se o kódovou tabulku, která definuje znaky anglické abecedy a jiné používané znaky. Každý znak lze vyjádřit posloupností čísel.
 
 2. (Hand-drawn) picture of time signals between ATmega328P and LCD keypad shield (HD44780 driver) when transmitting three character data `De2`.
 

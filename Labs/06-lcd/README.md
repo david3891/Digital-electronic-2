@@ -2,7 +2,7 @@
 
 Link to this file in your GitHub repository:
 
-[https://github.com/your-github-account/repository-name/lab_name](https://github.com/...)
+(https://github.com/david3891/Digital-electronic-2/blob/main/Labs/06-lcd/README.md)
 
 
 ### LCD display module

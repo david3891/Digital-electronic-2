@@ -1,70 +1,59 @@
-# Lab 5: YOUR_FIRSTNAME FAMILYNAME
+# Lab 7: YOUR_FIRSTNAME LASTNAME
 
-Link to your `Digital-electronics-2` GitHub repository:
+Link to this file in your GitHub repository:
 
-(https://github.com/david3891/Digital-electronic-2)
+[https://github.com/your-github-account/repository-name/lab_name](https://github.com/...)
 
 
-### 7-segment library
+### Analog-to-Digital Conversion
 
-1. In your words, describe the difference between Common Cathode and Common Anode 7-segment display.
-   * CC SSD
-   * CA SSD - anody všech segmentů 7-segmentovky jsou spojeny a připojeny na napájení - ovládají se vysokou úrovní (active high)
+1. Complete table with voltage divider, calculated, and measured ADC values for all five push buttons.
 
-2. Code listing with syntax highlighting of two interrupt service routines (`TIMER1_OVF_vect`, `TIMER0_OVF_vect`) from counter application with at least two digits, ie. values from 00 to 59:
+   | **Push button** | **PC0[A0] voltage** | **ADC value (calculated)** | **ADC value (measured)** |
+   | :-: | :-: | :-: | :-: |
+   | Right  | 0&nbsp;V | 0   |  |
+   | Up     | 0.495&nbsp;V | 101 |  |
+   | Down   |       |     |  |
+   | Left   |       |     |  |
+   | Select |       |     |  |
+   | none   |       |     |  |
 
-```c
-/**********************************************************************
- * Function: Timer/Counter1 overflow interrupt
- * Purpose:  Increment counter value from 00 to 59.
- **********************************************************************/
-uint8_t seg1 = 0; 
-uint8_t seg2 = 0; 
-ISR(TIMER1_OVF_vect)
-{ 
-    seg1++; 
-    if (seg1 == 10)
-    { 
-        seg1 = 0; 
-        seg2++;   
-        if (seg2 == 6) 
-            seg2 = 0; 
-    }
-}
-```
+2. Code listing of ACD interrupt service routine for sending data to the LCD/UART and identification of the pressed button. Always use syntax highlighting and meaningful comments:
 
 ```c
 /**********************************************************************
- * Function: Timer/Counter0 overflow interrupt
- * Purpose:  Display tens and units of a counter at SSD.
+ * Function: ADC complete interrupt
+ * Purpose:  Display value on LCD and send it to UART.
  **********************************************************************/
-ISR(TIMER0_OVF_vect)
-{ 
-    static uint8_t pos = 0;
-    
-    if (pos == 0)
-    { 
-       SEG_update_shift_regs(dig1,0);
-    } 
-    else
-    { 
-       SEG_update_shift_regs(dig2,1); 
-    }
+ISR(ADC_vect)
+{
+    uint16_t value = 0;
+    char lcd_string[4] = "0000";
 
-    pos++; 
-    if (pos > 1) pos = 0; 
+    value = ADC;                  // Copy ADC result to 16-bit variable
+    itoa(value, lcd_string, 10);  // Convert decimal value to string
+
+    // WRITE YOUR CODE HERE
+
 }
 ```
 
-3. Flowchart figure for function `SEG_clk_2us()` which generates one clock period on `SEG_CLK` pin with a duration of 2&nbsp;us. The image can be drawn on a computer or by hand. Use clear descriptions of the individual steps of the algorithms.
 
-   ![diagram](https://github.com/david3891/Digital-electronic-2/blob/main/Labs/05-segment/diagram.jpg)
+### UART communication
+
+1. (Hand-drawn) picture of UART signal when transmitting three character data `De2` in 4800 7O2 mode (7 data bits, odd parity, 2 stop bits, 4800&nbsp;Bd).
+
+   ![your figure]()
+
+2. Flowchart figure for function `uint8_t get_parity(uint8_t data, uint8_t type)` which calculates a parity bit of input 8-bit `data` according to parameter `type`. The image can be drawn on a computer or by hand. Use clear descriptions of the individual steps of the algorithms.
+
+   ![your figure]()
 
 
-### Kitchen alarm
+### Temperature meter
 
-Consider a kitchen alarm with a 7-segment display, one LED and three push buttons: start, +1 minute, -1 minute. Use the +1/-1 minute buttons to increment/decrement the timer value. After pressing the Start button, the countdown starts. The countdown value is shown on the display in the form of mm.ss (minutes.seconds). At the end of the countdown, the LED will start blinking.
+Consider an application for temperature measurement and display. Use temperature sensor [TC1046](http://ww1.microchip.com/downloads/en/DeviceDoc/21496C.pdf), LCD, one LED and a push button. After pressing the button, the temperature is measured, its value is displayed on the LCD and data is sent to the UART. When the temperature is too high, the LED will start blinking.
 
-1. Scheme of kitchen alarm; do not forget the supply voltage. The image can be drawn on a computer or by hand. Always name all components and their values.
+1. Scheme of temperature meter. The image can be drawn on a computer or by hand. Always name all components and their values.
 
-   ![zapojeni](https://github.com/david3891/Digital-electronic-2/blob/main/Labs/05-segment/zapojeni.PNG)
+   ![your figure]()

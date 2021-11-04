@@ -74,7 +74,7 @@ The purpose of the laboratory exercise is to understand analog-to-digital number
    | :-: | :-: | :-: | :-: |
    | Right  | 0&nbsp;V | 0   |  |
    | Up     | 0.495&nbsp;V | 101 |  |
-   | Down   |       |     |  |
+   | Down   |   0.157&nbsp;V    |     |  |
    | Left   |       |     |  |
    | Select |       |     |  |
    | none   |       |     |  |

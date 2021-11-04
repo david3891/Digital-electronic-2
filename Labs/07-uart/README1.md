@@ -48,7 +48,7 @@ The purpose of the laboratory exercise is to understand analog-to-digital number
 
    &nbsp;
 
-   ![Equation: Voltage divider](Images/eq_divider3.png)
+   ![Equation: Voltage divider](https://github.com/tomas-fryza/Digital-electronics-2/blob/master/Labs/07-uart/Images/eq_divider3.png)
 
    &nbsp;
 

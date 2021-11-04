@@ -103,11 +103,11 @@ The operation with the AD converter is performed through ADMUX, ADCSRA, ADCL+ADC
    | :-- | :-: | :-: | :-- |
    | Voltage reference    | ADMUX | REFS1:0 | 00: ..., 01: AVcc voltage reference (5V), ... |
    | Input channel        | ADMUX | MUX3:0 | 0000: ADC0, 0001: ADC1, ... |
-   | ADC enable           | ADCSRA |  |  |
-   | Start conversion     |  |  |  |
-   | ADC interrupt enable |  |  |  |
-   | ADC clock prescaler  |  | ADPS2:0 | 000: Division factor 2, 001: 2, 010: 4, ...|
-   | ADC 10-bit result    |  |  |  |
+   | ADC enable           | ADCSRA | ADEN | Writing this bit to one enables the ADC. By writing it to zero, the ADC is turned off. |
+   | Start conversion     | ADCSRA | ADSC | n Single Conversion mode, write this bit to one to start each conversion. Writing zero to this bit has no effect |
+   | ADC interrupt enable | ADCSRA | ADIE | When this bit is written to one and the I-bit in SREG is set, the ADC Conversion Complete Interrupt is activated.|
+   | ADC clock prescaler  | ADCSRA | ADPS2:0 | 000: Division factor 2, 001: 2, 010: 4, ...|
+   | ADC 10-bit result    | ADCL and ADCH |  ADC9:0 | These bits represent the result from the conversion |
 
 ### Version: Atmel Studio 7
 

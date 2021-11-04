@@ -42,9 +42,9 @@ The purpose of the laboratory exercise is to understand analog-to-digital number
 
 2. According to the connection, calculate the voltage values on pin PC0[A0] if one button is pressed at a time. In this case, the voltage on the pin is given by the [voltage divider](https://www.allaboutcircuits.com/tools/voltage-divider-calculator/), where resistors R3, R4, R5 and R6 are applied successively.
 
-   ![Equation: Voltage divider](Images/eq_divider1.png)
+   ![Equation: Voltage divider](https://github.com/tomas-fryza/Digital-electronics-2/blob/master/Labs/07-uart/Images/eq_divider1.png)
 
-   ![Equation: Voltage divider](Images/eq_divider2.png)
+   ![Equation: Voltage divider](https://github.com/tomas-fryza/Digital-electronics-2/blob/master/Labs/07-uart/Images/eq_divider2.png)
 
    &nbsp;
 

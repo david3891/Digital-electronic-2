@@ -42,13 +42,13 @@ The purpose of the laboratory exercise is to understand analog-to-digital number
 
 2. According to the connection, calculate the voltage values on pin PC0[A0] if one button is pressed at a time. In this case, the voltage on the pin is given by the [voltage divider](https://www.allaboutcircuits.com/tools/voltage-divider-calculator/), where resistors R3, R4, R5 and R6 are applied successively.
 
-   ![Equation: Voltage divider](Images/eq_divider1.png)
+   ![Equation: Voltage divider](https://github.com/tomas-fryza/Digital-electronics-2/blob/master/Labs/07-uart/Images/eq_divider1.png)
 
-   ![Equation: Voltage divider](Images/eq_divider2.png)
+   ![Equation: Voltage divider](https://github.com/tomas-fryza/Digital-electronics-2/blob/master/Labs/07-uart/Images/eq_divider2.png)
 
    &nbsp;
 
-   ![Equation: Voltage divider](Images/eq_divider3.png)
+   ![Equation: Voltage divider](https://github.com/tomas-fryza/Digital-electronics-2/blob/master/Labs/07-uart/Images/eq_divider3.png) = 5V*(R4/(R2+R3+R4)) = 5V*(620/(620+330+3000)) = 
 
    &nbsp;
 
@@ -74,9 +74,9 @@ The purpose of the laboratory exercise is to understand analog-to-digital number
    | :-: | :-: | :-: | :-: |
    | Right  | 0&nbsp;V | 0   |  |
    | Up     | 0.495&nbsp;V | 101 |  |
-   | Down   |       |     |  |
-   | Left   |       |     |  |
-   | Select |       |     |  |
+   | Down   |   0.157&nbsp;V    |     |  |
+   | Left   |  0.202&nbsp;V     |     |  |
+   | Select |   0.4&nbsp;V    |     |  |
    | none   |       |     |  |
 
 <a name="part1"></a>
@@ -103,11 +103,11 @@ The operation with the AD converter is performed through ADMUX, ADCSRA, ADCL+ADC
    | :-- | :-: | :-: | :-- |
    | Voltage reference    | ADMUX | REFS1:0 | 00: ..., 01: AVcc voltage reference (5V), ... |
    | Input channel        | ADMUX | MUX3:0 | 0000: ADC0, 0001: ADC1, ... |
-   | ADC enable           | ADCSRA |  |  |
-   | Start conversion     |  |  |  |
-   | ADC interrupt enable |  |  |  |
-   | ADC clock prescaler  |  | ADPS2:0 | 000: Division factor 2, 001: 2, 010: 4, ...|
-   | ADC 10-bit result    |  |  |  |
+   | ADC enable           | ADCSRA | ADEN | Writing this bit to one enables the ADC. By writing it to zero, the ADC is turned off. |
+   | Start conversion     | ADCSRA | ADSC | n Single Conversion mode, write this bit to one to start each conversion. Writing zero to this bit has no effect |
+   | ADC interrupt enable | ADCSRA | ADIE | When this bit is written to one and the I-bit in SREG is set, the ADC Conversion Complete Interrupt is activated.|
+   | ADC clock prescaler  | ADCSRA | ADPS2:0 | 000: Division factor 2, 001: 2, 010: 4, ...|
+   | ADC 10-bit result    | ADCL and ADCH |  ADC9:0 | These bits represent the result from the conversion |
 
 ### Version: Atmel Studio 7
 

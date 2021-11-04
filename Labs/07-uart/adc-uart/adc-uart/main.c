@@ -56,7 +56,7 @@ int main(void)
     // Set prescaler to 262 ms and enable overflow interrupt
     TIM1_overflow_262ms()
     // Initialize UART to asynchronous, 8N1, 9600
-
+    uart_init(UART_BAUD_SELECT(9600,16000000));
     // Enables interrupts by setting the global interrupt mask
     sei();
     ADCSRA |= (1<<ADIE);
@@ -91,11 +91,15 @@ ISR(TIMER1_OVF_vect)
 ISR(ADC_vect)
 {
     uint16_t value = 0;
-    char lcd_string[4] = "0000";
+    char lcd_string[] = "0000";
 
     value = ADC;                  // Copy ADC result to 16-bit variable
     itoa(value, lcd_string, 10);  // Convert decimal value to string
-
-    // WRITE YOUR CODE HERE
-
+    
+    lcd_puts(lcd_string);
+    uart_puts(lcd_string);
+    uart_puts("\n\r");
+    uart_putc('\n');
+    uart_putc('\r');
+    
 }

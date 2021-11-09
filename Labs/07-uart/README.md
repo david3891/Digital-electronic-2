@@ -27,14 +27,42 @@ Link to this file in your GitHub repository:
  **********************************************************************/
 ISR(ADC_vect)
 {
-    uint16_t value = 0;
-    char lcd_string[4] = "0000";
+	uint16_t value = 0;
+	char lcd_string[4] = "0000";
+	value = ADC;	  // Copy ADC result to 16-bit variable
+	lcd_gotoxy(8,0);  //vymazani prvni hodnoty
+	lcd_puts("    ");
+	//vlozeni nove hodnoty na display
+	itoa(value, lcd_string, 10);  // prevod desitkove soustavy na string
+	lcd_gotoxy(8,0);
+	lcd_puts(lcd_string);
+	// poslani na UART
+	uart_puts(lcd_string);
+	uart_puts(" ");
+	//vymazani prvni hodnoty
+	lcd_gotoxy(13,0);
+	lcd_puts("    ");
+	//nova hodnota na display
+	//hodnota na display v hexadecimalni
+	itoa(value, lcd_string, 16);    // prevod hexadecimalni soustavy na string
+	lcd_gotoxy(13,0);
+	lcd_puts(lcd_string);
+	//zobrazit po stisku tlacitka
+	lcd_gotoxy(8,1);
+	lcd_puts("    ");
+	lcd_gotoxy(12,1);
+	lcd_puts("    ");
+	
+	lcd_gotoxy(8, 1);                // cosi
+	itoa(value, lcd_string, 10);     // prevod desitkove soustavy na string
 
-    value = ADC;                  // Copy ADC result to 16-bit variable
-    itoa(value, lcd_string, 10);  // Convert decimal value to string
-
-    // WRITE YOUR CODE HERE
-
+	if (value>1000)                { lcd_puts("NONE");}
+	if ((value>600)&&(value<1000)) { lcd_puts("SELECT");}
+	if ((value>350)&&(value<450))  { lcd_puts("LEFT");}
+	if ((value>200)&&(value<270))  { lcd_puts("DOWN");}
+	if ((value>5)&&(value<120))    { lcd_puts("UP");}
+	if (value==0)                  { lcd_puts("RIGHT");}
+	;
 }
 ```
 

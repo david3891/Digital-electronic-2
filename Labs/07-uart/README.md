@@ -75,7 +75,7 @@ ISR(ADC_vect)
 
 2. Flowchart figure for function `uint8_t get_parity(uint8_t data, uint8_t type)` which calculates a parity bit of input 8-bit `data` according to parameter `type`. The image can be drawn on a computer or by hand. Use clear descriptions of the individual steps of the algorithms.
 
-   ![your figure]()
+   ![diagram](https://github.com/david3891/Digital-electronic-2/blob/main/Labs/07-uart/diagram.jpg)
 
 
 ### Temperature meter

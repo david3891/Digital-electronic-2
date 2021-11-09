@@ -55,6 +55,7 @@ int main(void)
     // Configure 16-bit Timer/Counter1 to start ADC conversion
     // Set prescaler to 262 ms and enable overflow interrupt
     TIM1_overflow_262ms()
+	TIM1_overflow_interrupt_enable();
     // Initialize UART to asynchronous, 8N1, 9600
     uart_init(UART_BAUD_SELECT(9600,16000000));
     // Enables interrupts by setting the global interrupt mask
@@ -80,8 +81,7 @@ int main(void)
  **********************************************************************/
 ISR(TIMER1_OVF_vect)
 {
-    
-
+    ADCSRA |= (1<<ADSC);    // start ADC
 }
 
 /**********************************************************************
@@ -90,16 +90,40 @@ ISR(TIMER1_OVF_vect)
  **********************************************************************/
 ISR(ADC_vect)
 {
-    uint16_t value = 0;
-    char lcd_string[] = "0000";
+	uint16_t value = 0;
+	char lcd_string[4] = "0000";
+	value = ADC;	  // Copy ADC result to 16-bit variable
+	lcd_gotoxy(8,0);  //vymazani prvni hodnoty
+	lcd_puts("    ");
+	//vlozeni nove hodnoty na display
+	itoa(value, lcd_string, 10);  // prevod desitkove soustavy na string
+	lcd_gotoxy(8,0);
+	lcd_puts(lcd_string);
+	// poslani na UART
+	uart_puts(lcd_string);
+	uart_puts(" ");
+	//vymazani prvni hodnoty
+	lcd_gotoxy(13,0);
+	lcd_puts("    ");
+	//nova hodnota na display
+	//hodnota na display v hexadecimalni
+	itoa(value, lcd_string, 16);    // prevod hexadecimalni soustavy na string
+	lcd_gotoxy(13,0);
+	lcd_puts(lcd_string);
+	//zobrazit po stisku tlacitka
+	lcd_gotoxy(8,1);
+	lcd_puts("    ");
+	lcd_gotoxy(12,1);
+	lcd_puts("    ");
+	
+	lcd_gotoxy(8, 1);                // cosi
+	itoa(value, lcd_string, 10);     // prevod desitkove soustavy na string
 
-    value = ADC;                  // Copy ADC result to 16-bit variable
-    itoa(value, lcd_string, 10);  // Convert decimal value to string
-    
-    lcd_puts(lcd_string);
-    uart_puts(lcd_string);
-    uart_puts("\n\r");
-    uart_putc('\n');
-    uart_putc('\r');
-    
+	if (value>1000)                { lcd_puts("NONE");}
+	if ((value>600)&&(value<1000)) { lcd_puts("SELECT");}
+	if ((value>350)&&(value<450))  { lcd_puts("LEFT");}
+	if ((value>200)&&(value<270))  { lcd_puts("DOWN");}
+	if ((value>5)&&(value<120))    { lcd_puts("UP");}
+	if (value==0)                  { lcd_puts("RIGHT");}
+	;
 }

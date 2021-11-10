@@ -1,87 +1,86 @@
-# Lab 7: David Sladkowski
+# Lab 8: YOUR_FIRSTNAME LASTNAME
 
 Link to this file in your GitHub repository:
 
-(https://github.com/david3891/Digital-electronic-2/blob/main/Labs/07-uart/README.md)
+[https://github.com/your-github-account/repository-name/lab_name](https://github.com/...)
 
+### Arduino Uno pinout
 
-### Analog-to-Digital Conversion
+1. In the picture of the Arduino Uno board, mark the pins that can be used for the following functions:
+   * PWM generators from Timer0, Timer1, Timer2
+   * analog channels for ADC
+   * UART pins
+   * I2C pins
+   * SPI pins
+   * external interrupt pins INT0, INT1
 
-1. Complete table with voltage divider, calculated, and measured ADC values for all five push buttons.
+   ![your figure](Images/arduino_uno_pinout.png)
 
-   | **Push button** | **PC0[A0] voltage** | **ADC value (calculated)** | **ADC value (measured)** |
-   | :-: | :-: | :-: | :-: |
-   | Right  | 0&nbsp;V 		|  0   	| 0 	|
-   | Up     | 0.495&nbsp;V 	|  101 	| 99 	|
-   | Down   | 1.203&nbsp;V   	|  246  | 256 	|
-   | Left   | 1.97&nbsp;V    	|  403  | 410 	|
-   | Select | 3.182&nbsp;V   	|  651  | 640 	|
-   | none   | 5&nbsp;V   	|  1023	| 1023 	|
+### I2C
 
-2. Code listing of ACD interrupt service routine for sending data to the LCD/UART and identification of the pressed button. Always use syntax highlighting and meaningful comments:
+1. Code listing of Timer1 overflow interrupt service routine for scanning I2C devices and rendering a clear table on the UART.
 
 ```c
 /**********************************************************************
- * Function: ADC complete interrupt
- * Purpose:  Display value on LCD and send it to UART.
+ * Function: Timer/Counter1 overflow interrupt
+ * Purpose:  Update Finite State Machine and test I2C slave addresses 
+ *           between 8 and 119.
  **********************************************************************/
-ISR(ADC_vect)
+ISR(TIMER1_OVF_vect)
 {
-	uint16_t value = 0;
-	char lcd_string[4] = "0000";
-	value = ADC;	  // Copy ADC result to 16-bit variable
-	lcd_gotoxy(8,0);  //vymazani prvni hodnoty
-	lcd_puts("    ");
-	//vlozeni nove hodnoty na display
-	itoa(value, lcd_string, 10);  // prevod desitkove soustavy na string
-	lcd_gotoxy(8,0);
-	lcd_puts(lcd_string);
-	// poslani na UART
-	uart_puts(lcd_string);
-	uart_puts(" ");
-	//vymazani prvni hodnoty
-	lcd_gotoxy(13,0);
-	lcd_puts("    ");
-	//nova hodnota na display
-	//hodnota na display v hexadecimalni
-	itoa(value, lcd_string, 16);    // prevod hexadecimalni soustavy na string
-	lcd_gotoxy(13,0);
-	lcd_puts(lcd_string);
-	//zobrazit po stisku tlacitka
-	lcd_gotoxy(8,1);
-	lcd_puts("    ");
-	lcd_gotoxy(12,1);
-	lcd_puts("    ");
-	
-	lcd_gotoxy(8, 1);                // cosi
-	itoa(value, lcd_string, 10);     // prevod desitkove soustavy na string
+    static state_t state = STATE_IDLE;  // Current state of the FSM
+    static uint8_t addr = 7;            // I2C slave address
+    uint8_t result = 1;                 // ACK result from the bus
+    char uart_string[2] = "00"; // String for converting numbers by itoa()
 
-	if (value>1000)                { lcd_puts("NONE");}
-	if ((value>600)&&(value<1000)) { lcd_puts("SELECT");}
-	if ((value>350)&&(value<450))  { lcd_puts("LEFT");}
-	if ((value>200)&&(value<270))  { lcd_puts("DOWN");}
-	if ((value>5)&&(value<120))    { lcd_puts("UP");}
-	if (value==0)                  { lcd_puts("RIGHT");}
-	;
+    // FSM
+    switch (state)
+    {
+    // Increment I2C slave address
+    case STATE_IDLE:
+        addr++;
+        // If slave address is between 8 and 119 then move to SEND state
+
+        break;
+    
+    // Transmit I2C slave address and get result
+    case STATE_SEND:
+        // I2C address frame:
+        // +------------------------+------------+
+        // |      from Master       | from Slave |
+        // +------------------------+------------+
+        // | 7  6  5  4  3  2  1  0 |     ACK    |
+        // |a6 a5 a4 a3 a2 a1 a0 R/W|   result   |
+        // +------------------------+------------+
+        result = twi_start((addr<<1) + TWI_WRITE);
+        twi_stop();
+        /* Test result from I2C bus. If it is 0 then move to ACK state, 
+         * otherwise move to IDLE */
+
+        break;
+
+    // A module connected to the bus was found
+    case STATE_ACK:
+        // Send info about active I2C slave to UART and move to IDLE
+
+        break;
+
+    // If something unexpected happens then move to IDLE
+    default:
+        state = STATE_IDLE;
+        break;
+    }
 }
 ```
 
+2. (Hand-drawn) picture of I2C signals when reading checksum (only 1 byte) from DHT12 sensor. Indicate which specific moments control the data line master and which slave.
 
-### UART communication
+   ![your figure]()
 
-1. (Hand-drawn) picture of UART signal when transmitting three character data `De2` in 4800 7O2 mode (7 data bits, odd parity, 2 stop bits, 4800&nbsp;Bd).
+### Meteo station
 
-   ![signal](https://github.com/david3891/Digital-electronic-2/blob/main/Labs/07-uart/signal.jpg)
+Consider an application for temperature and humidity measurement and display. Use combine sensor DHT12, real time clock DS3231, LCD, and one LED. Application display time in hours:minutes:seconds at LCD, measures both temperature and humidity values once per minut, display both values on LCD, and when the temperature is too high, the LED starts blinking.
 
-2. Flowchart figure for function `uint8_t get_parity(uint8_t data, uint8_t type)` which calculates a parity bit of input 8-bit `data` according to parameter `type`. The image can be drawn on a computer or by hand. Use clear descriptions of the individual steps of the algorithms.
+1. FSM state diagram picture of meteo station. The image can be drawn on a computer or by hand. Concise name of individual states and describe the transitions between them.
 
-   ![diagram](https://github.com/david3891/Digital-electronic-2/blob/main/Labs/07-uart/diagram.jpg)
-
-
-### Temperature meter
-
-Consider an application for temperature measurement and display. Use temperature sensor [TC1046](http://ww1.microchip.com/downloads/en/DeviceDoc/21496C.pdf), LCD, one LED and a push button. After pressing the button, the temperature is measured, its value is displayed on the LCD and data is sent to the UART. When the temperature is too high, the LED will start blinking.
-
-1. Scheme of temperature meter. The image can be drawn on a computer or by hand. Always name all components and their values.
-
-   ![teplomer](https://github.com/david3891/Digital-electronic-2/blob/main/Labs/07-uart/teplomer.PNG)
+   ![your figure]()

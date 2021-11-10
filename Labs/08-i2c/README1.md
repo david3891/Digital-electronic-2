@@ -1,6 +1,6 @@
 # Lab 8: I2C/TWI serial communication
 
-![I2C scan](Images/arduino_uno_i2c.jpg)
+![I2C scan](https://github.com/tomas-fryza/Digital-electronics-2/blob/master/Labs/08-i2c/Images/arduino_uno_i2c.jpg)
 
 ### Learning objectives
 

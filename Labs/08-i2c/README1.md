@@ -55,7 +55,7 @@ I2C is a serial protocol for two-wire interface to connect low-speed devices lik
 
 I2C uses only two wires: SCL (serial clock) and SDA (serial data). Both need to be pulled up with a resistor to +Vdd. There are also I2C level shifters which can be used to connect to two I2C buses with different voltages.
 
-![I2C bus](Images/i2c-bus.png)
+![I2C bus](https://github.com/tomas-fryza/Digital-electronics-2/blob/master/Labs/08-i2c/Images/i2c-bus.png)
 
 The initial I2C specifications defined maximum clock frequency of 100 kHz. This was later increased to 400 kHz as Fast mode. There is also a High speed mode which can go up to 3.4 MHz and there is also a 5 MHz ultra-fast mode.
 

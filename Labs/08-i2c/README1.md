@@ -1,23 +1,24 @@
-# Lab 7: ADC and UART serial communication
+# Lab 8: I2C/TWI serial communication
 
-![LCD-keypad shield](Images/arduino_uno_adc.jpg)
+![I2C scan](Images/arduino_uno_i2c.jpg)
 
 ### Learning objectives
 
 After completing this lab you will be able to:
 
-* Understand the analog-to-digital conversion process
-* How to use internal ADC unit
-* Understand the UART communication
+* Understand the I2C communication
+* Use functions from I2C library
+* Use FSM-type of application
 
-The purpose of the laboratory exercise is to understand analog-to-digital number conversion and the use of an internal 8-channel 10-bit AD converter. Another goal is to understand serial asynchronous communication, data frame structure and communication options using an internal USART unit.
+The purpose of the laboratory exercise is to understand serial synchronous communication using the I2C (Inter-Integrated Circuit) bus, as well as the structure of the address and data frame and the possibilities of communication using the internal TWI (Two Wire Interface) unit. Another goal is to understand the structure of FSM (Finite-State Machine) in C.
 
 ### Table of contents
 
 * [Preparation tasks](#preparation)
 * [Part 1: Synchronize repositories and create a new folder](#part1)
-* [Part 2: Analog-to-Digital Conversion](#part2)
-* [Part 3: UART communication](#part3)
+* [Part 2: I2C bus](#part2)
+* [Part 3: I2C scanner](#part3)
+* [Part 4: Final application](#part4)
 * [Experiments on your own](#experiments)
 * [Lab assignment](#assignment)
 * [References](#references)
@@ -26,217 +27,234 @@ The purpose of the laboratory exercise is to understand analog-to-digital number
 
 ## Preparation tasks (done before the lab at home)
 
-1. Use schematic of the [LCD keypad shield](../../Docs/arduino_shield.pdf) and find out the connection of five push buttons: Select, Left, Up, Down, and Right.
+1. Use schematic of the [Arduino Uno](../../Docs/arduino_shield.pdf) board and find out to which pins the SDA and SCL signals are connected.
 
-   &nbsp;
+   | **Signal** | **MCU pin** | **Arduino pin(s)** |
+   | :-: | :-: | :-: |
+   | SDA (data)  |  |  |
+   | SCL (clock) |  |  |
 
-   &nbsp;
+2. What is the general structure of I2C address and data frames?
 
-   &nbsp;
-
-   &nbsp;
-
-   &nbsp;
-
-   &nbsp;
-
-2. According to the connection, calculate the voltage values on pin PC0[A0] if one button is pressed at a time. In this case, the voltage on the pin is given by the [voltage divider](https://www.allaboutcircuits.com/tools/voltage-divider-calculator/), where resistors R3, R4, R5 and R6 are applied successively.
-
-   ![Equation: Voltage divider](https://github.com/tomas-fryza/Digital-electronics-2/blob/master/Labs/07-uart/Images/eq_divider1.png)
-
-   ![Equation: Voltage divider](https://github.com/tomas-fryza/Digital-electronics-2/blob/master/Labs/07-uart/Images/eq_divider2.png)
-
-   &nbsp;
-
-   ![Equation: Voltage divider](https://github.com/tomas-fryza/Digital-electronics-2/blob/master/Labs/07-uart/Images/eq_divider3.png) = 5V*(R4/(R2+R3+R4)) = 5V*(620/(620+330+3000)) = 
-
-   &nbsp;
-
-   ![Equation: Voltage divider](Images/eq_divider4.png)
-
-   &nbsp;
-
-   ![Equation: Voltage divider](Images/eq_divider5.png)
-
-   &nbsp;
-
-3. Calculate the voltage value if none of the push buttons is pressed.
-
-   ![Equation: Voltage divider](Images/eq_divider6.png)
-
-   &nbsp;
-
-4. Calculate the ADC values for these voltages according to the following equation if reference is Vref=5V and number of bits for analog to digital conversion is n=10.
-
-   ![Equation: ADC conversion](Images/eq_adc.png)
-
-   | **Push button** | **PC0[A0] voltage** | **ADC value (calculated)** | **ADC value (measured)** |
-   | :-: | :-: | :-: | :-: |
-   | Right  | 0&nbsp;V | 0   |  |
-   | Up     | 0.495&nbsp;V | 101 |  |
-   | Down   |   0.157&nbsp;V    |     |  |
-   | Left   |  0.202&nbsp;V     |     |  |
-   | Select |   0.4&nbsp;V    |     |  |
-   | none   |       |     |  |
+   | **Frame type** | **8** | **7** | **6** | **5** | **4** | **3** | **2** | **1** | **0** | **Description**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
+   | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-- |
+   | Address | | | | | | | | | | |
+   | Data    | | | | | | | | | | |
 
 <a name="part1"></a>
 
 ## Part 1: Synchronize repositories and create a new folder
 
-Run Git Bash (Windows) of Terminal (Linux), navigate to your working directory, and update local repository. Create a new working folder `Labs/07-uart` for this exercise.
+Run Git Bash (Windows) of Terminal (Linux), navigate to your working directory, and update local repository. Create a new working folder `Labs/08-i2c` for this exercise.
 
 <a name="part2"></a>
 
-## Part 2: Analog-to-Digital Conversion
+## Part 2: I2C bus
 
-We live in an analog world, surrounded by digital devices. Everything we see, feel or measure is analog in nature such as light, temperature, speed, pressure etc. It is obvious that we need something that could convert these analog parameters to digital value for a microcontroller or micro-processor to understand it.
+I2C is a serial protocol for two-wire interface to connect low-speed devices like microcontrollers, EEPROMs, A/D and D/A converters, I/O interfaces and other similar peripherals in embedded systems. It was invented by Philips and now it is used by almost all major IC manufacturers. Each slave device has a unique address [[2]](https://i2c.info/).
 
-An [Analog to Digital Converter](https://components101.com/articles/analog-to-digital-adc-converters) (ADC) is a circuit that converts a continuous voltage value (analog) to a binary value (digital) that can be understood by a digital device which could then be used for digital computation. These ADC circuits can be found as an individual ADC ICs by themselves or embedded into a modern microcontroller.
+I2C uses only two wires: SCL (serial clock) and SDA (serial data). Both need to be pulled up with a resistor to +Vdd. There are also I2C level shifters which can be used to connect to two I2C buses with different voltages.
 
-The internal ADC module of ATmega328P can be used in relatively slow and not extremely accurate data acquisitions. But it is a good choice in most situations, like reading sensor data or reading waveforms.
+![I2C bus](Images/i2c-bus.png)
 
-AVR ADC module has 10-bit resolution with +/-2LSB accuracy. It means it returns a 10-bit integer value, i.e. a range of 0 to 1023. It can convert data at up to 76.9kSPS, which goes down when higher resolution is used. We mentioned that there are 8 ADC channels available on pins, but there are also three internal channels that can be selected with the multiplexer decoder. These are temperature sensor (channel 8), bandgap reference (1.1V) and GND (0V) [[4]](https://embedds.com/adc-on-atmega328-part-1/).
+The initial I2C specifications defined maximum clock frequency of 100 kHz. This was later increased to 400 kHz as Fast mode. There is also a High speed mode which can go up to 3.4 MHz and there is also a 5 MHz ultra-fast mode.
 
-The operation with the AD converter is performed through ADMUX, ADCSRA, ADCL+ADCH, ADCSRB, and DIDR0 registers. See [ATmega328P datasheet](https://www.microchip.com/wwwproducts/en/ATmega328p) (**Analog-to-Digital Converter > Register Description**) and complete the following table.
+In normal state both lines (SCL and SDA) are high. The communication is initiated by the master device. It generates the Start condition (S) followed by the address of the slave device (SLA). If the bit 0 of the address byte was set to 0 the master device will write to the slave device (SLA+W). Otherwise, the next byte will be read from the slave device (SLA+R). Each byte is supplemented by an ACK (low level) or NACK (high level) acknowledgment bit, which is always transmitted by the device receiving the previous byte.
 
-   | **Operation** | **Register(s)** | **Bit(s)** | **Description** |
-   | :-- | :-: | :-: | :-- |
-   | Voltage reference    | ADMUX | REFS1:0 | 00: ..., 01: AVcc voltage reference (5V), ... |
-   | Input channel        | ADMUX | MUX3:0 | 0000: ADC0, 0001: ADC1, ... |
-   | ADC enable           | ADCSRA | ADEN | Writing this bit to one enables the ADC. By writing it to zero, the ADC is turned off. |
-   | Start conversion     | ADCSRA | ADSC | n Single Conversion mode, write this bit to one to start each conversion. Writing zero to this bit has no effect |
-   | ADC interrupt enable | ADCSRA | ADIE | When this bit is written to one and the I-bit in SREG is set, the ADC Conversion Complete Interrupt is activated.|
-   | ADC clock prescaler  | ADCSRA | ADPS2:0 | 000: Division factor 2, 001: 2, 010: 4, ...|
-   | ADC 10-bit result    | ADCL and ADCH |  ADC9:0 | These bits represent the result from the conversion |
+The address byte is followed by one or more data bytes, where each contains 8 bits and is again terminated by ACK/NACK. Once all bytes are read or written the master device generates Stop condition (P). This means that the master device switches the SDA line from low voltage level to high voltage level before the SCL line switches from high to low [[3]](https://www.electronicshub.org/basics-i2c-communication/).
+
+![I2C protocol](Images/i2c_protocol.jpg)
+
+Note that, most I2C devices support repeated start condition. This means that before the communication ends with a stop condition, master device can repeat start condition with address byte and change the mode from writing to reading.
+
+### Example of I2C communication
+
+> **Question:** Let the following image shows several frames of I2C communication between ATmega328P and slave device. What circuit is it and what information was sent over the bus?
+>
+   &nbsp;
+   ![Temperature reception from DHT12 sensor](Images/twi-dht12_temperature_decoded.png)
+
+> **Answer:** This communication example contains a total of five frames. After the start condition, which is initiated by the master, the address frame is always sent. It contains a 7-bit address of the slave device, supplemented by information on whether the data will be written to the slave or read from it to the master. The ninth bit of the address frame is an acknowledgment provided by the receiving side.
+>
+> Here, the address is 184 (decimal), i.e. `1011100_0` in binary including R/W=0. The slave address is therefore 1011100 (0x5c) and master will write data to the slave. The slave has acknowledged the address reception, so that the communication can continue.
+>
+> According to the list of [I2C addresses](https://learn.adafruit.com/i2c-addresses/the-list) the device could be humidity/temp or pressure sensor. The signals were really recorded when communicating with the humidity and temperature sensor.
+>
+> The data frame always follows the address one and contains eight data bits from the MSB to the LSB and is again terminated by an acknowledgment from the receiving side. Here, number `2` was writen to the sensor. According to the [sensor manual](../../Docs/dht12_manual.pdf), this is the address of register, to which the integer part of measured temperature is stored. (The following register contains its fractional part.)
+>
+   | **Register address** | **Description** |
+   | :-: | :-- |
+   | 0x00 | Humidity integer part |
+   | 0x01 | Humidity fractional part |
+   | 0x02 | Temperature integer part |
+   | 0x03 | Temperature fractional part |
+   | 0x04 | Checksum |
+
+> After the repeated start, the same circuit address is sent on the I2C bus, but this time with the read bit R/W=1 (185, `1011100_1`). Subsequently, data frames are sent from the slave to the master until the last of them is confirmed by the NACK value. Then the master generates a stop condition on the bus and the communication is terminated.
+>
+> The communication in the picture therefore records the temperature transfer from the sensor, when the measured temperature is 25.3 degrees celsius.
+>
+   | **Frame #** | **Description** |
+   | :-: | :-- |
+   | 1 | Address frame with SLA+W = 184 (0x5c<<1 + 0) |
+   | 2 | Data frame sent to the slave represents the ID of internal register |
+   | 3 | Address frame with SLA+R = 185 (0x5c<<1 + 1) |
+   | 4 | Data frame with integer part of temperature read from slave |
+   | 5 | Data frame with fractional part of temperature read from slave|
+
+<a name="part3"></a>
+
+## Part 3: I2C scanner
+
+### Version: SimulIDE
+
+1. In the SimulIDE application, use the following components: I2C Ram (**Components > Logic > Memory > I2C Ram**), I2C to Parallel (**Components > Logic > Converters > I2C to Parallel**) and create a connection according to the following figure. Also, change **Control Code** property of all I2C devices. These codes represent the I2C addresses of the slave circuits. Pins A2, A1, A0 allow you to specify part of the device address. Thus, up to 8 (2^3 = 8) identical devices can be connected and it will be possible to distinguish them. External pull-up resistors on SDA and SCL signals must be used for correct simulation.
+
+   ![I2C scanner circuit](Images/screenshot_simulide_i2c_scan.png)
+
+### Version: Real hardware
+
+1. Use breadboard to connect humidity/temperature [DHT12](../../Docs/dht12_manual.pdf) digital sensor and combined module with real time clock (RTC) device [DS3231](../../Docs/ds3231_manual.pdf) and [AT24C32](../../Docs/at24c32_manual.pdf) memory to Arduino Uno board. Instead of external pull-up resistors on the SDA and SCL pins, it is possible to use the internal ones, directly in the microcontroller.
+
+   | **DHT12 pin** | **Arduino Uno pin** |  |
+   | :-: | :-: | :-: |
+   | +<br>SDA<br>-<br>SCL | 5V (or 3.3V)<br>SDA<br>GND<br>SCL | ![Humidity/temperature sensor DHT12](Images/dht12.jpg) |
+
+   | **RTC+EEPROM pin** | **Arduino Uno pin** |  |
+   | :-: | :-: | :-: |
+   | 32K<br>SQW<br>SCL<br>SDA<br>VCC<br>GND | Not connected<br>Not connected<br>SCL<br>SDA<br>5V (or 3.3V)<br>GND | ![RTC/EEPROM module](Images/rtc_eeprom.jpg) |
 
 ### Version: Atmel Studio 7
 
-1. Create a new GCC C Executable Project for ATmega328P within `07-uart` working folder and copy/paste [template code](main.c) to your `main.c` source file.
+1. Create a new GCC C Executable Project for ATmega328P within `08-i2C` working folder and copy/paste [template code](main.c) to your `main.c` source file.
 
 2. In **Solution Explorer** click on the project name, then in menu **Project**, select **Add Existing Item... Shift+Alt+A** and add:
-   * UART files [`uart.h`](../library/include/uart.h), [`uart.c`](../library/uart.c) from `Examples/library/include` and `Examples/library` folders,
-   * LCD library files `lcd.h`, `lcd_definitions.h`, `lcd.c` from the previous labs,
+   * I2C/TWI files `twi.h`, [`twi.c`](../../Examples/library/twi.c) from `Examples/library/include` and `Examples/library` folders,
+   * UART library files `uart.h`, `uart.c` from the previous lab,
    * Timer library `timer.h` from the previous labs.
 
 ### Version: Command-line toolchain
 
-1. Copy `main.c` and `Makefile` files from previous lab to `Labs/07-uart` folder.
+1. Copy `main.c` and `Makefile` files from previous lab to `Labs/08-i2c` folder.
 
-2. Copy/paste [template code](main.c) to your `07-uart/main.c` source file.
+2. Copy/paste [template code](main.c) to your `08-i2c/main.c` source file.
 
-3. Add the source files of UART and LCD libraries between the compiled files in `07-uart/Makefile`.
+3. Add the source files of I2C/TWI and UART libraries between the compiled files in `08-i2c/Makefile`.
 
 ```Makefile
 # Add or comment libraries you are using in the project
-SRCS += $(LIBRARY_DIR)/lcd.c
+#SRCS += $(LIBRARY_DIR)/lcd.c
 SRCS += $(LIBRARY_DIR)/uart.c
-#SRCS += $(LIBRARY_DIR)/twi.c
+SRCS += $(LIBRARY_DIR)/twi.c
 #SRCS += $(LIBRARY_DIR)/gpio.c
 #SRCS += $(LIBRARY_DIR)/segment.c
 ```
 
-### Both versions
+### All versions
 
-1. Compile the template code and download to Arduino Uno board or load `*.hex` firmware to SimulIDE circuit (create an identical connection to the LCD keypad shield).
+1. Use the [`twi.h`](../../Examples/library/include/twi.h) header file from the I2C/TWI library to complete the description of the functions in the following table.
 
-   ![SimulIDE](Images/screenshot_simulide_lcd_probe.png)
-
-2. In `main.c` configure ADC as follows:
-   * voltage reference: AVcc with external capacitor
-   * input channel: ADC0
-   * clock prescaler: 128
-   * enable ADC module
-   * enable interrupt
-
-   Use single conversion mode and start each conversion every second (use Timer/Counter1 overflow).
-
-   Read the voltage level when a push button is pressed and display it in decimal at LCD display position `a`. Display the same value but in hexadecimal at position `b`. Note that you can use the 16-bit ADC variable--which is declared in the AVR library--to read the value from both converter registers ADCH:L.
-
-   ![LCD-keypad shield](Images/arduino_uno_adc.jpg)
-
-```c
-/**********************************************************************
- * Function: ADC complete interrupt
- * Purpose:  Display value on LCD and send it to UART.
- **********************************************************************/
-ISR(ADC_vect)
-{
-    uint16_t value = 0;
-    char lcd_string[4] = "0000";
-
-    value = ADC;                  // Copy ADC result to 16-bit variable
-    itoa(value, lcd_string, 10);  // Convert decimal value to string
-
-    // WRITE YOUR CODE HERE
-}
-```
-
-3. Write the values to the table from Preparation tasks section and compare them with the calculated ones.
-
-   ![SimulIDE](Images/screenshot_simulide_lcd_buttons.png)
-
-<a name="part3"></a>
-
-## Part 3: UART communication
-
-The UART (Universal Asynchronous Receiver-Transmitter) is not a communication protocol like SPI and I2C, but a physical circuit in a microcontroller, or a stand-alone integrated circuit, that translates communicated data between serial and parallel forms. It is one of the simplest and easiest method for implement and understanding.
-
-In UART communication, two UARTs communicate directly with each other. The transmitting UART converts parallel data from a CPU into serial form, transmits it in serial to the receiving UART, which then converts the serial data back into parallel data for the receiving device. Only two wires are needed to transmit data between two UARTs. Data flows from the Tx pin of the transmitting UART to the Rx pin of the receiving UART [[6]](https://www.circuitbasics.com/basics-uart-communication/).
-
-UARTs transmit data asynchronously, which means there is no external clock signal to synchronize the output of bits from the transmitting UART. Instead, timing is agreed upon in advance between both units, and special **Start** (log. 0) and 1 or 2 **Stop** (log. 1) bits are added to each data package. These bits define the beginning and end of the data packet so the receiving UART knows when to start reading the bits. In addition to the start and stop bits, the packet/frame also contains data bits and optional parity.
-
-The amount of **data** in each packet can be set from 5 to 9 bits. If it is not otherwise stated, data is transferred least-significant bit (LSB) first.
-
-**Parity** is a form of very simple, low-level error checking and can be Even or Odd. To produce the parity bit, add all 5-9 data bits and extend them to an even or odd number. For example, assuming parity is set to even and was added to a data byte `0110_1010`, which has an even number of 1's (4), the parity bit would be set to 0. Conversely, if the parity mode was set to odd, the parity bit would be 1.
-
-One of the most common UART formats is called **9600 8N1**, which means 8 data bits, no parity, 1 stop bit and a symbol rate of 9600&nbsp;Bd.
-
-![UART frame 8N1](Images/uart_frame_8n1.png)
-
-### Example of UART communication
-
-> **Question:** Let the following image shows one frame of UART communication transmitting from the ATmega328P in 8N1 mode. What ASCII code/character does it represent? According to bit period, estimate the symbol rate.
->
-   &nbsp;
-   ![Timing of UART](Images/uart_capture_E.png)
-
-> **Answer:** 8N1 means that 8 data bits are transmitted, no parity is used, and the number of stop bits is one. Because the frame always starts with a low level start bit and the order of the data bits is from LSB to MSB, the data transmitted bu UART is therefore `0100_0101` (0x45) and according to the [ASCII](http://www.asciitable.com/) (American Standard Code for Information Interchange) table, it represents the letter `E`.
->
-> The figure further shows that the bit period, i.e. the duration of one bit, is 104&nbsp;us. The symbol rate of the communication is thus 1/104e-6 = 9615, i.e. approximately 9600&nbsp;Bd.
->
-
-1. In the lab, we are using [UART library](http://www.peterfleury.epizy.com/avr-software.html) developed by Peter Fleury. Use online manual of UART library and add the input parameters and description of the functions to the following table.
-
-   | **Function name** | **Function parameter(s)** | **Description** | **Example** |
+   | **Function name** | **Function parameters** | **Description** | **Example** |
    | :-- | :-- | :-- | :-- |
-   | `uart_init` | `UART_BAUD_SELECT(9600, F_CPU)` | Initialize UART to 8N1 and set baudrate to 9600&nbsp;Bd | `uart_init(UART_BAUD_SELECT(9600, F_CPU));` |
-   | `uart_getc` |  |  |
-   | `uart_putc` |  |  |
-   | `uart_puts` |  |  |
+   | `twi_init` | None | Initialize TWI, enable internal pull-up resistors, and set SCL frequency | `twi_init();` |
+   | `twi_start` |  | <br>&nbsp; | `twi_start((addr<<1)+TWI_READ);` |
+   | `twi_write` |  | <br>&nbsp; |  |
+   | `twi_read_ack` | <br>&nbsp; |  |  |
+   | `twi_read_nack` | <br>&nbsp; |  |  |
+   | `twi_stop` |  |  | `twi_stop();` |
 
-2. Extend the application from the previous point and send information about the results of the analog to digital conversion to the UART transmitter. Use internal UART module in 9600 8N1 mode. If needed, define the CPU clock frequency:
+2. Explore the use of Finite State Machine (FSM) in the `main.c` source file. Note that state names are declared using `typedef enum` as follows
 
 ```c
-#ifndef F_CPU
-# define F_CPU 16000000  // CPU frequency in Hz required for UART_BAUD_SELECT
-#endif
+typedef enum {  // FSM declaration
+    STATE_IDLE = 1,
+    STATE_SEND,
+    STATE_ACK
+} state_t;
 ```
+
+  and the body and transitions between states are defined using `switch`/`case` C structure.
+
+```c
+    static state_t state = STATE_IDLE;  // Current state of the FSM
+
+    // FSM
+    switch (state)
+    {
+    // Increment I2C slave address
+    case STATE_IDLE:
+        ...
+        break;
+    
+    // Transmit I2C slave address and get result
+    case STATE_SEND:
+        ...
+        break;
+
+    // A module connected to the bus was found
+    case STATE_ACK:
+        ...
+        break;
+
+    // If something unexpected happens then move to IDLE
+    default:
+        state = STATE_IDLE;
+        break;
+    }
+```
+
+3. Complete the Timer/Counter1 overflow routine according to the following state diagram and scan slave addresses. Transmit useful information via UART to PuTTY SSH Client or Serial monitor.
+
+   ![FSM for I2C scanner](Images/fsm_scan_i2c.png)
+
+> The figure above was created in [diagrams.net](https://app.diagrams.net/). It is an open source, online, desktop and container deployable diagramming software.
+>
+
+4. Form the UART output of your application to a hexadecimal table such as the following figure. Note that, the designation RA represents I2C addresses that are [reserved](https://www.pololu.com/file/download/UM10204.pdf?file_id=0J435) and cannot be used for slave circuits.
+
+```Makefile
+   Scan I2C-bus for slave devices:
+
+         .0 .1 .2 .3 .4 .5 .6 .7 .8 .9 .a .b .c .d .e .f
+   0x0.: RA RA RA RA RA RA RA RA -- -- -- -- -- -- -- --
+   0x1.: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+   0x2.: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+   0x3.: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+   0x4.: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+   0x5.: -- -- -- -- -- -- -- 57 -- -- -- -- -- -- -- --
+   0x6.: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+   0x7.: -- -- -- -- -- -- -- -- RA RA RA RA RA RA RA RA
+   
+   Number of detected devices: 1
+```
+
+<a name="part4"></a>
+
+## Part 4: Final application
 
 ### Version: SimulIDE
 
-1. In SimulIDE, right click to ATmega328 package and select **Open Serial Monitor**. In this window you can receive data from the microcontroller, but also send them back.
+1. In the SimulIDE application, create the circuit with eight active-low LEDs connected to I2C to Parallel expander. You can use individual components (ie. 8 resistors and 8 LEDs) or single **Passive > ResistorDip** and **Outputs > LedBar** according to the following figure. Several signals can form a bus **Logic > Other Logic > Bus**, as well.
 
-   ![SimulIDE](Images/screenshot_simulide_lcd_uart.png)
+   ![I2C LED bar](Images/screenshot_simulide_i2c_leds.png)
+
+2. Create an application that sequentially turns on one of the eight LEDs. ie first LED0, then LED1 and finally LED7, then start again from the beginning. Use Timer/Counter1 and change the value every 262 ms. Send the status of the LEDs to the UART. Try to complement the LED controls according to the Knight Rider style, ie light the LEDs in one direction and then in the opposite one.
 
 ### Version: Real hardware
 
-1. Use PuTTY SSH Client to receive values from Arduino board. Set connection type to **Serial** and check that the configuration is the same as in the ATmega328 application. Note that, serial line to connect to (here COM3 on Windows) could be different. In Linux, use `dmesg` command to verify your port (such as `/dev/ttyUSB0`).
+1. Program an FSM application which reads data from humidity/temperature DHT12 sensor and sends them periodically via UART to PuTTY SSH Client. Use Timer/Counter1 with a suitable overflow time. Note that, according to the [DHT12 manual](../../Docs/dht12_manual.pdf), the internal DHT12 data registers have the following structure.
 
-   ![PuTTY](Images/screenshot_putty_type.png)
-   ![PuTTY](Images/screenshot_putty_config.png)
+   | **Register address** | **Description** |
+   | :-: | :-- |
+   | 0x00 | Humidity integer part |
+   | 0x01 | Humidity fractional part |
+   | 0x02 | Temperature integer part |
+   | 0x03 | Temperature fractional part |
+   | 0x04 | Checksum |
 
-> WARNING: Before Arduino board re-programming process, PuTTY SSH Client must be closed!
->
+   ![FSM for I2C temperature](Images/fsm_dht_i2c.png)
+
+2. Find out how checksum byte value is calculated.
 
 ## Synchronize repositories
 
@@ -246,79 +264,21 @@ Use [git commands](https://github.com/tomas-fryza/Digital-electronics-2/wiki/Use
 
 ## Experiments on your own
 
-1. Based on the converted values, write the part of the code that distinguishes which push button was pressed and display the information at LCD position `c` and send it to UART. Try to recalculate the input voltage values in mV. Hint: Use integer data types only; the absolute accuracy of the calculation is not important here.
+### Version: SimulIDE
 
-   > Note: If you need to transmit a larger amount of data, it is necessary to increase the size of the transmit/receive buffer in the `uart.h` file, eg to 64.
-   >
-```c
-/** @brief  Size of the circular receive buffer, must be power of 2
- *
- *  You may need to adapt this constant to your target and your application by adding
- *  CDEFS += -DUART_RX_BUFFER_SIZE=nn to your Makefile.
- */
-#ifndef UART_RX_BUFFER_SIZE
-# define UART_RX_BUFFER_SIZE 64
-#endif
-
-/** @brief  Size of the circular transmit buffer, must be power of 2
- *
- *  You may need to adapt this constant to your target and your application by adding
- *  CDEFS += -DUART_TX_BUFFER_SIZE=nn to your Makefile.
- */
-#ifndef UART_TX_BUFFER_SIZE
-# define UART_TX_BUFFER_SIZE 64
-#endif
-```
-
-   ![SimulIDE](Images/screenshot_simulide_lcd_final.png)
-
-2. Design a piece of code to calculate the parity bit from the specified value. Display the parity of ADC converted value on the LCD and UART.
-
-Extra. Design your own library for working with analog to digital convertor.
+1. Program an application that communicates with memory modules using the I2C bus. Store random data in the first ten address positions of the first and second memory modules. Then copy 5 values from the first memory to the third and another 5 values from the second memory to the third one. Send the first ten values from each memory module to the UART.
 
 ### Version: Real hardware
 
-3. What is the meaning of ASCII control characters `\r`, `\n`, and `\b`? What codes are defined for these characters in ASCII table?
+1. Extend the humidity/temperature application, use the RTC/EEPROM module and read second and minute values from RTC DS3231 device, and send them via UART to PuTTY SSH Client. According to the [DS3231 manual](../../Docs/ds3231_manual.pdf), the internal RTC registers have the following structure.
 
-4. Use [ANSI Escape Sequences](https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797) and modify color and format of transmitted strings according to the following code. Try other formatting styles.
+   | **Address** | **Bit 7** | **Bits 6:4** | **Bits 3:0** |
+   | :-: | :-: | :-: | :-: |
+   | 0x00 | 0 | 10 Seconds | Seconds |
+   | 0x01 | 0 | 10 Minutes | Minutes |
+   | ... | ... | ... | ... |
 
-   ```C
-   /* Color/formatting sequence always starts by "\033[" and ends by "m" strings.
-   * One or more formatting codes "#", separated by ";" can be used within
-   * one line, such as:
-   *    \033[#m      or
-   *    \033[#;#m    or
-   *    \033[#;#;#m  etc. */
-   uart_puts("\033[4;32m");        // 4: underline style; 32: green foreground
-   uart_puts("This is all Green and Underlined.");
-   uart_puts("\033[0m");           // 0: reset all attributes
-   uart_puts("This is Normal text again.");
-   ```
-
-5. Program an interactive console that communicates between ATmega328P and the computer (PuTTY application) via UART. Let the main screen of the console is as follows:
-
-   ```bash
-   --- Interactive UART console ---
-   1: read current Timer/counter1 value
-   2: reset Timer/counter1
-   > 
-   ```
-
-   After pressing the '1' key on computer keyboard, ATmega328P receives ASCII code of the key and sends the current Timer1 value back to PuTTY. After pressing the '2' key, ATmega328P resets Timer1 value, etc. Use ANSI escape sequences to highlight information within PuTTY console.
-
-   ```C
-   uint8_t c;
-   ...
-
-   c = uart_getc();
-   if (c != '\0') {        // Data available from UART
-       if (c == '1') {     // Key '1' received
-           ...
-       }
-   }
-   ```
-
-6. Program a software UART transmitter (emulated UART) that will be able to generate UART data on any output pin of the ATmega328P microcontroller. Let the bit rate be approximately 9600&nbsp;Bd and do not use the delay library. Also consider the possibility of calculating the parity bit. Verify the UART communication with logic analyzer or oscilloscope.
+2. Verify the I2C communication with logic analyzer. Find out in what format the hour information is stored in the circuit. Implement an application that reads the hours and displays it in both 12-hour and 24-hour formats.
 
 <a name="assignment"></a>
 
@@ -326,7 +286,8 @@ Extra. Design your own library for working with analog to digital convertor.
 
 *Prepare all parts of the assignment in Czech, Slovak or English, insert them in this [template](Assignment.md), export formatted output (not Markdown) [from HTML to PDF](https://github.com/tomas-fryza/Digital-electronics-2/wiki/Export-README-to-PDF), and submit a single PDF file via [BUT e-learning](https://moodle.vutbr.cz/). The deadline for submitting the task is the day before the next laboratory exercise.*
 
-*Vypracujte všechny části úkolu v českém, slovenském, nebo anglickém jazyce, vložte je do této [šablony](Assignment.md), exportujte formátovaný výstup (nikoli výpis v jazyce Markdown) [z HTML do PDF](https://github.com/tomas-fryza/Digital-electronics-2/wiki/Export-README-to-PDF) a odevzdejte jeden PDF soubor prostřednictvím [e-learningu VUT](https://moodle.vutbr.cz/). Termín odevzdání úkolu je den před dalším počítačovým cvičením.*
+> *Vypracujte všechny části úkolu v českém, slovenském, nebo anglickém jazyce, vložte je do této [šablony](Assignment.md), exportujte formátovaný výstup (nikoli výpis v jazyce Markdown) [z HTML do PDF](https://github.com/tomas-fryza/Digital-electronics-2/wiki/Export-README-to-PDF) a odevzdejte jeden PDF soubor prostřednictvím [e-learningu VUT](https://moodle.vutbr.cz/). Termín odevzdání úkolu je den před dalším počítačovým cvičením.*
+>
 
 <a name="references"></a>
 
@@ -334,20 +295,18 @@ Extra. Design your own library for working with analog to digital convertor.
 
 1. Tomas Fryza. [Schematic of LCD Keypad shield](../../Docs/arduino_shield.pdf)
 
-2. EETech Media, LLC. [Voltage Divider Calculator](https://www.allaboutcircuits.com/tools/voltage-divider-calculator/)
+2. Ezoic. [I2C Info - I2C Bus, Interface and Protocol](https://i2c.info/)
 
-3. Components101. [Introduction to Analog to Digital Converters (ADC Converters)](https://components101.com/articles/analog-to-digital-adc-converters)
+3. Electronicshub.org. [Basics of I2C Communication | Hardware, Data Transfer, Configuration](https://www.electronicshub.org/basics-i2c-communication/)
 
-4. Embedds. [ADC on Atmega328. Part 1](https://embedds.com/adc-on-atmega328-part-1/)
+4. Adafruit. [List of I2C addresses](https://learn.adafruit.com/i2c-addresses/the-list)
 
-5. Microchip Technology Inc. [ATmega328P datasheet](https://www.microchip.com/wwwproducts/en/ATmega328p)
+5. Aosong. [Digital temperature DHT12](../../Docs/dht12_manual.pdf)
 
-6. Circuit Basics. [Basics of UART Communication](https://www.circuitbasics.com/basics-uart-communication/)
+6. JGraph Ltd. [diagrams.net](https://app.diagrams.net/)
 
-7. [ASCII Table](http://www.asciitable.com/)
+7. NXP. [I2C-bus specification and user manual](https://www.pololu.com/file/download/UM10204.pdf?file_id=0J435)
 
-8. Peter Fleury. [UART library](http://www.peterfleury.epizy.com/avr-software.html)
+8. Tomas Fryza. [Useful Git commands](https://github.com/tomas-fryza/Digital-electronics-2/wiki/Useful-Git-commands)
 
-9. Tomas Fryza. [Useful Git commands](https://github.com/tomas-fryza/Digital-electronics-2/wiki/Useful-Git-commands)
-
-10. Christian Petersen. [ANSI Escape Sequences](https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797)
+9. Maxim Integrated. [DS3231, Extremely accurate I2C-Integrated RTC/TCXO/Crystal](../../Docs/ds3231_manual.pdf)

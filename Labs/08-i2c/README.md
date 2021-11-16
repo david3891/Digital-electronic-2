@@ -59,7 +59,7 @@ ISR(TIMER1_OVF_vect)
         twi_stop();
         /* Test result from I2C bus. If it is 0 then move to ACK state, 
          * otherwise move to IDLE */
-        if ((result = 0))
+        if (result == 0)
         {
             state = STATE_ACK;
         } 

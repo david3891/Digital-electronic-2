@@ -29,3 +29,28 @@ Mikrokontrolér udržiava sekundy, minúty, hodiny, dni, mesiace a roky ako info
 Zariadenie operuje ako slave-device na I2C komunikácií. Clock signál má štandart mód (100kHz) a rýchly mód (400kHz). Zariadenie operuje na dvoch módoch:
 
 **1. Slave receiver mód (write mode):** prvý byte je adresný 1101000, nasleduje R/W bit (Write = 0), následne ACK bit. Ďaľši byte master odošle slovo, ktoré je naša adresa (viď. Obrázok 2.) a následne master môže odoslať 0 alebo viac bytov (v našej komunikácii nemusíme, v každom musí byť ACK bit).
+
+**2 .Slave transmitter mód (read mode):** prvý byte sa líši jedine v R/W bite (Read = 1), následne slave odosiela byty, ktoré reprezentujú data. Register pointer ktorý reprezentuje adresný byte sa postupne pričítava po každom prečítanom byte, takže každý byte je nová informácia. Zobrazenie komunikácie je na obrázku 3..
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

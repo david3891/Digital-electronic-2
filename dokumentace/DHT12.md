@@ -16,3 +16,14 @@ Senzor na meranie vlhkosti a teploty prostredia. Komunikácia prebieha cez proto
 - V ďalšej časti komunikácie slave odošle ten istý adresný byte, až na R/W bit, ktorý je tentoraz 1, čo znamená že dáta budú čítané. Ďalej slave odošle byte, podľa adresy registru, ktorú master poslal a posiela až dokým nejaký byte nebude mať hodnotu ACK/NAK 1.
 
 ![obrázek](https://github.com/tomas-fryza/Digital-electronics-2/blob/master/Labs/08-i2c/Images/i2c_protocol.jpg)
+
+   | **Adresa registru** | **Popis adresy** |
+   |         :-:         |        :-:       |
+   | 0x00                | vlhkosť          |
+   | 0x01                | vlhkosť (zlomková čásť ) |
+   | 0x02                | teplota          |
+   | 0x03                | teplota (zlomková část) |
+   | 0x04                | kontrola (súčet všetkých informácií) |
+   
+   ## Zapojenie:
+   

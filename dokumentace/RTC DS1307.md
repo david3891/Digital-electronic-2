@@ -40,6 +40,12 @@ Zariadenie operuje ako slave-device na I2C komunikácií. Clock signál má šta
 
 ![zapojení](http://labpeers.com/php-file-download-script/download.php?filename=../media/catalog/product/f/i/file.jpg)
 
+## Zdroje:
+
+(https://pdf1.alldatasheet.com/datasheet-pdf/view/226599/MAXIM/DS1307.html)
+(https://pdf1.alldatasheet.com/datasheet-pdf/view/58481/DALLAS/DS1307.html)
+(https://wiki.dfrobot.com/Real_Time_Clock_Module__DS1307___SKU_DFR0151_)
+(https://lastminuteengineers.com/ds1307-rtc-arduino-tutorial/)
 
 
 

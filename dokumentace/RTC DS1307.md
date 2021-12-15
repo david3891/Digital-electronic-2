@@ -23,3 +23,9 @@ Mikrokontrolér udržiava sekundy, minúty, hodiny, dni, mesiace a roky ako info
 **DS:** pin má výstup teploty, pokiaľ je teplotný senzor pripojený  
 
 ![obrázek](https://lastminuteengineers.b-cdn.net/wp-content/uploads/arduino/DS1307-RTC-Module-Pinout.png)
+
+## Popis fungovania:
+
+Zariadenie operuje ako slave-device na I2C komunikácií. Clock signál má štandart mód (100kHz) a rýchly mód (400kHz). Zariadenie operuje na dvoch módoch:
+
+**1. Slave receiver mód (write mode):** prvý byte je adresný 1101000, nasleduje R/W bit (Write = 0), následne ACK bit. Ďaľši byte master odošle slovo, ktoré je naša adresa (viď. Obrázok 2.) a následne master môže odoslať 0 alebo viac bytov (v našej komunikácii nemusíme, v každom musí byť ACK bit).

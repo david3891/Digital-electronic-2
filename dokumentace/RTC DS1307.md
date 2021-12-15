@@ -32,6 +32,9 @@ Zariadenie operuje ako slave-device na I2C komunikácií. Clock signál má šta
 
 **2 .Slave transmitter mód (read mode):** prvý byte sa líši jedine v R/W bite (Read = 1), následne slave odosiela byty, ktoré reprezentujú data. Register pointer ktorý reprezentuje adresný byte sa postupne pričítava po každom prečítanom byte, takže každý byte je nová informácia. Zobrazenie komunikácie je na obrázku 3..
 
+![tabulka_1](https://github.com/david3891/Digital-electronic-2/blob/main/dokumentace/obr%C3%A1zky/RTC_DS1307_1.PNG)
+
+![tabulka_2]()
 
 
 

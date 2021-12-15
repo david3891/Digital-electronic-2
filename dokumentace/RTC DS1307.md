@@ -21,3 +21,5 @@ Mikrokontrolér udržiava sekundy, minúty, hodiny, dni, mesiace a roky ako info
 **SLC:** hodinový vstup pre I2C rozhranie  
 **SDA:** data vstup/výstup pre I2C rozhranie, vyžaduje vonkajší pull-up rezistor  
 **DS:** pin má výstup teploty, pokiaľ je teplotný senzor pripojený  
+
+![obrázek](https://lastminuteengineers.b-cdn.net/wp-content/uploads/arduino/DS1307-RTC-Module-Pinout.png)

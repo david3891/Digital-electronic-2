@@ -29,3 +29,13 @@ Senzor na meranie vlhkosti a teploty prostredia. Komunikácia prebieha cez proto
    
    ![zapojení](https://content.instructables.com/ORIG/FH0/4TQU/JB2S55SA/FH04TQUJB2S55SA.png?auto=webp&fit=bounds&frame=1&width=1024)
    
+   ## Zdroje:
+   (https://github.com/tomas-fryza/Digital-electronics-2/tree/master/Labs/08-i2c)
+   (https://github.com/tomas-fryza/Digital-electronics-2/blob/master/Docs/dht12_manual.pdf)
+   (https://www.google.cz/?hl=cs)
+   
+   
+
+
+
+   

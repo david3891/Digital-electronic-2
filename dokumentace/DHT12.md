@@ -27,3 +27,5 @@ Senzor na meranie vlhkosti a teploty prostredia. Komunikácia prebieha cez proto
    
    ## Zapojenie:
    
+   ![zapojení](https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.instructables.com%2FDHT12-i2c-Cheap-Humidity-and-Temperature-Sensor-Fa%2F&psig=AOvVaw3YkZt3d1kQbtiiSi_RFIaW&ust=1639668434795000&source=images&cd=vfe&ved=0CAsQjRxqFwoTCKja7YqP5vQCFQAAAAAdAAAAABAD)
+   

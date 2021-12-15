@@ -52,7 +52,10 @@ Budú opäť z veľkej časti rovnaké. Rozdielny je len prúdový odber pri zop
 
 ![obrázek](https://navody.dratek.cz/images/technikuv_blog/navody/spinaci_prvky/vicekanal.png)
 
+### Použité zdroje:
 
+(https://navody.dratek.cz/zaciname-s-arduinem/spinaci-prvky-rele-tranzistory-a-tranzistorova-pole.html)  
+(https://www.mouser.com/pdfdocs/PanasonicPhotomosRelaysWhitePaper.PDF)
 
 
 

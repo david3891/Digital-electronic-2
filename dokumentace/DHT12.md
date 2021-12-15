@@ -17,12 +17,12 @@ Senzor na meranie vlhkosti a teploty prostredia. Komunikácia prebieha cez proto
 
 ![obrázek](https://github.com/tomas-fryza/Digital-electronics-2/blob/master/Labs/08-i2c/Images/i2c_protocol.jpg)
 
-   | **Adresa registru** | **Popis adresy** |
-   |         :-:         |        :-:       |
-   | 0x00                | vlhkosť          |
-   | 0x01                | vlhkosť (zlomková čásť ) |
-   | 0x02                | teplota          |
-   | 0x03                | teplota (zlomková část) |
+   | **Adresa registru** | **Popis adresy**                     |
+   |         :-:         |        :-:                           |
+   | 0x00                | vlhkosť                              |
+   | 0x01                | vlhkosť (zlomková čásť )             |
+   | 0x02                | teplota                              |
+   | 0x03                | teplota (zlomková část)              |
    | 0x04                | kontrola (súčet všetkých informácií) |
    
    ## Zapojenie:

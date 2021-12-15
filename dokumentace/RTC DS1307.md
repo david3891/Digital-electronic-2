@@ -16,7 +16,7 @@ Mikrokontrolér udržiava sekundy, minúty, hodiny, dni, mesiace a roky ako info
 
 **VCC:** 3,3V až 5,5V  
 **GND:** uzemnenie  
-**BAT:** náhradné napájanie pre 3V lítiovú batériu, využíva sa na udržiavanie presného času, pre prípád keď hlavný zdroj energie je prerušený; **keď sa nevyužíva tento pin, musí            byť uzemnený**  
+**BAT:** náhradné napájanie pre 3V lítiovú batériu, využíva sa na udržiavanie presného času, pre prípád keď hlavný zdroj energie je prerušený; **keď sa nevyužíva tento pin, musí byť uzemnený**  
 **SQW pin:** výstup sú 4 obdĺžnikové signály: 1Hz, 4kHz, 8kHz alebo 32kHz; **ktoré sú programovateľné**  
 **SLC:** hodinový vstup pre I2C rozhranie  
 **SDA:** data vstup/výstup pre I2C rozhranie, vyžaduje vonkajší pull-up rezistor  

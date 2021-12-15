@@ -34,7 +34,7 @@ Zariadenie operuje ako slave-device na I2C komunikácií. Clock signál má šta
 
 ![tabulka_1](https://github.com/david3891/Digital-electronic-2/blob/main/dokumentace/obr%C3%A1zky/RTC_DS1307_1.PNG)
 
-![tabulka_2]()
+![tabulka_2](https://github.com/david3891/Digital-electronic-2/blob/main/dokumentace/obr%C3%A1zky/RTC_DS1307_2.PNG)
 
 
 

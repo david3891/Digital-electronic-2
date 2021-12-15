@@ -6,7 +6,7 @@ Tento senzor je analógový a meria vlhkosť pôdy pomocou tzv. kapacitného sn�
 
 ![obrázek1](https://www.agc.sk/thumbs-4/135821_imgs-Nov%C3%A9-kapacitn%C3%BD-%C4%8Didlo-p%C3%B4dnej-vlhkosti-nie-je-%C4%BEahk%C3%A9.jpeg)
 ![obrázek2](https://techfun.sk/wp-content/uploads/2020/06/c.png)  
-- Senzor a odporúčaná úroveň vnorenia do pôdy.
+obr. Senzor a odporúčaná úroveň vnorenia do pôdy.
 
 ## Parametre a špecifikácia:
 
@@ -24,7 +24,7 @@ Tento senzor je analógový a meria vlhkosť pôdy pomocou tzv. kapacitného sn�
 Schému zapojenia senzora je možno vidieť na obr. 3. Senzor obsahuje frekvenčný oscilátor vstavaný do časovača 555. Generovaný obdĺžnikový signál je posielaný do kapacitného senzora, ktorého reaktancia tvorí delič napätia s pasívnym 10kΩ rezistorom. S narastajúcou vlhkosťou pôdy narastá aj kapacita senzoru, čím sa znižuje napätie na výstupnom PINe.
 
 ![obrázek](https://how2electronics.com/wp-content/uploads/2019/11/Capacitive-Soil-Moisture-Sensor-Schematic-1.png)  
-- Zjednodušená schéma zapojenia senzoru.
+obr. Zjednodušená schéma zapojenia senzoru.
 
 ## Zapojenie senzoru pre Arduino UNO:
 
